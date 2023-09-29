@@ -1,6 +1,6 @@
 # Filesystem Starter Class
 
-from sqliteCRUD import SQLiteCRUD
+from sqliteCRUD import SQLiteconn
 from prettytable import PrettyTable
 
 
@@ -10,7 +10,7 @@ class FileSystem:
             self.db_name = "filesystem.sqlite"
         else:
             self.db_name = db_name
-        self.crud = SQLiteCRUD(db_name)
+        self.crud = SQLiteconn(db_name)
         self.cwd = "/home/user"
         self.cwdid = 6
 
@@ -80,7 +80,7 @@ if __name__ == "__main__":
         (10, 9, 'File6.txt', '2023-09-25 13:15:00', '2023-09-25 13:15:00', 3072.25, 'file', 'user5', 'group5', 'rwxr-xr--'),
     ]
 
-    conn = SQLiteCRUD("testfilesystem.sqlite")
+    conn = SQLiteconn("testfilesystem.sqlite")
 
     conn.drop_table(table_name)
 
