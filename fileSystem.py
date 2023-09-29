@@ -20,12 +20,12 @@ class FileSystem:
         pass
 
 
-    def list(self,**kwargs):
+    def list(self,**kwargs)-> str:
         """ List the files and folders in current directory
         """
+        pass
 
-
-    def chmod(self,**kwargs):
+    def chmod(self,**kwargs)-> str:
         """ Change the permissions of a file
             1) will need the file / folder id
 
