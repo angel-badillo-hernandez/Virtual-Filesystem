@@ -14,10 +14,16 @@ class FileSystem:
         self.cwd = "/"
         self.cwdid = 0
 
-    def __getFileId(self,**kwargs):
+    def __getFileId(self,**kwargs) -> int:
         """ Find a file id using current location + name
         """
-        pass
+        path:str = kwargs.get("path", None)
+
+        # Return -1 if no path specified
+        if not path:
+            return -1
+        
+        
 
 
     def list(self,**kwargs)-> str:
