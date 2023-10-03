@@ -11,8 +11,8 @@ class FileSystem:
         else:
             self.db_name = db_name
         self.crud = SQLiteconn(db_name)
-        self.cwd = "/home/user"
-        self.cwdid = 6
+        self.cwd = "/"
+        self.cwdid = 0
 
     def __getFileId(self,**kwargs):
         """ Find a file id using current location + name
