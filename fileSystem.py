@@ -23,7 +23,8 @@ class FileSystem:
         if not path:
             return -1
         
-        
+    def ls(self, **kwargs)->str:
+        pass        
 
 
     def list(self,**kwargs)-> str:

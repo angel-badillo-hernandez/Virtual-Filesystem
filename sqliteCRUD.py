@@ -130,7 +130,7 @@ class SQLiteconn:
         except sqlite3.Error as e:
             print(f"Error inserting data: {e}")
 
-    def read_data(self, table_name:str) -> None:
+    def select_data(self, table_name:str) -> None:
         """Read data from a table.
 
         Args:
@@ -288,7 +288,7 @@ if __name__ == "__main__":
     conn.insert_data(table_name, data)
 
     # Read data
-    conn.read_data(table_name)
+    conn.select_data(table_name)
 
     # Update data
     conn.update_data(table_name, "age", 26, "name", "Alice")
