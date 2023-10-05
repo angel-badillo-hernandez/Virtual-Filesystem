@@ -6,9 +6,6 @@ from prettytable import PrettyTable
 
 class FileSystem:
 
-    def __delattr__(self, __name: str) -> None:
-        pass
-
     def __init__(self,db_name:str | None= None, table_name:str | None = None) -> None:
         
         self.table_name = table_name if table_name else "FileSystem"
