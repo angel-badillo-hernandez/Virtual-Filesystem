@@ -1,10 +1,10 @@
 # conn Class for Sqlite
-
+from pypika import Table, Query, Field
 import sqlite3
 from prettytable import PrettyTable
+# from types import SimpleNamespace # Allows convert dict to object with dict keys as attributes
 
-
-class SQLiteconn:
+class SQLiteCRUD:
     def __init__(self, db_path: str) -> None:
         """Initialize database connection and cursor."""
         self.db_path = db_path
@@ -25,7 +25,7 @@ class SQLiteconn:
         table.add_rows(results)
         return table
 
-    def create_table(self, table_name:str, columns:list) -> None:
+    def create_table(self, table_name:str, columnsInfo:list[str]) -> None:
         """
         Params:
             table_name (str) - name of table
@@ -63,7 +63,6 @@ class SQLiteconn:
             create_table_query = f"DROP TABLE IF EXISTS {table_name});"
             self.cursor.execute(create_table_query)
             self.conn.commit()
-            print(f"Dropped '{table_name} successfully.")
         except sqlite3.Error as e:
             print(f"Error creating table: {e}")
 
@@ -73,7 +72,10 @@ class SQLiteconn:
         Args:
             raw (bool): Whether to return raw results or formatted table.
         """
-        self.cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+        table = Table("sqlite_master")
+        query:str = Query.from_(table).select(table.name).where(table.type == "table").get_sql()
+        self.cursor.execute(query)
+
         results = self.cursor.fetchall()
 
         if not raw:
@@ -130,6 +132,24 @@ class SQLiteconn:
         except sqlite3.Error as e:
             print(f"Error inserting data: {e}")
 
+    def select(self, query:str)-> list[dict]:
+        try:
+            # Retrieve all data from the table
+            results:list[dict[str]] = []
+
+            self.cursor.execute(query)
+            result = self.cursor.fetchall()
+            if result:
+                #
+                for row in result:
+                   # Converts tuple to dict
+                   results.append(dict(zip([desc[0] for desc in self.cursor.description], row)))
+            else:
+                print("No data found in the table.")
+        except sqlite3.Error as e:
+            print(f"Error reading data: {e}")
+        return results
+
     def select_data(self, table_name:str) -> None:
         """Read data from a table.
 
@@ -162,7 +182,9 @@ class SQLiteconn:
             condition_value (str): Value to use in the WHERE clause.
         """
         try:
-            # Update data in the table based on a condition
+            # Update data in the table based on a conditionz
+            query = Query.update(table_name).set(column, new_value).where(Field(condition_column) == condition_value).get_sql()
+            print(query)
             update_query = (
                 f"UPDATE {table_name} SET {column} = ? WHERE {condition_column} = ?;"
             )
@@ -230,9 +252,10 @@ class SQLiteconn:
 
         try:
             # Query the sqlite_master table to check if the table exists
-            cursor.execute(
-                f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table_name}';"
-            )
+            table:Table = Table("sqlite_master")
+            query:str = Query.from_(table).select(table.name).where(table.type == "table").where(table.name == table_name).get_sql()
+
+            cursor.execute(query)
             result = cursor.fetchone()
 
             # If result is not None, the table exists
@@ -254,7 +277,8 @@ class SQLiteconn:
         """
         try:
             # Drop the table if it exists
-            self.cursor.execute(f"DROP TABLE IF EXISTS {table_name};")
+            query:str = Query.drop_table(table_name).get_sql()
+            self.cursor.execute(query)
 
             # Commit the changes
             self.conn.commit()
@@ -268,11 +292,11 @@ class SQLiteconn:
 # Example usage:
 if __name__ == "__main__":
     db_name = "students.sqlite"
-    conn = SQLiteconn(db_name)
+    conn = SQLiteCRUD(db_name)
 
     # Define table schema
     table_name = "students"
-    columns = ["id TEXT", "name TEXT", "age INTEGER"]
+    columns = ["id INTEGER PRIMARY KEY", "name TEXT", "age INTEGER"]
 
     # # Create table
     conn.create_table(table_name, columns)
@@ -293,8 +317,14 @@ if __name__ == "__main__":
     # Update data
     conn.update_data(table_name, "age", 26, "name", "Alice")
 
+    query = Query.from_(table_name).select("age", "name").where(Field("id") > 1).get_sql()
+    print(query)
+    res = conn.select(query)
+    print(res)
     # Delete data
-    conn.delete_data(table_name, "name", "Alice")
+    # conn.delete_data(table_name, "name", "Alice")
 
     # Close the database connection
+
+    #conn.drop_table("students")
     conn.close_connection()
