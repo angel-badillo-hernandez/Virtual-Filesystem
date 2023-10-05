@@ -1,13 +1,12 @@
-#!/usr/bin/env python3
-import os
-from .TockenizeFlags import tockenizeFlags
-from .InvalidFlagsMsg import invalidFlagsMsg
+from fileSystem import FileSystem
+from TockenizeFlags import tockenizeFlags
+from InvalidFlagsMsg import invalidFlagsMsg
 
 pwd_flags:set[str] = {
     "--help"
 }
 
-def pwd(**kwargs)-> str:
+def pwd(fileSystem:FileSystem, **kwargs)-> str:
     """
     NAME
         pwd
@@ -31,22 +30,12 @@ def pwd(**kwargs)-> str:
         result = pwd.__doc__
     # If other valid flags or none
     else:
-        result = os.getcwd()
+        result = fileSystem.cwd
     
     return result
 
 if __name__ == "__main__":
-    f = ["--help", "--help", "-a", "-b"]
-
-    print(f"Running 'pwd' with the flags: {f}")
-    s = pwd(flags=f)
-    print(s)
-
-    print(f"\nRunning 'pwd' with no flags")
-    s = pwd()
-    print(s)
-
-    f = ["--help"]
-    print(f"\nRunning pwd with the flags: {f}")
-    s = pwd(flags=f)
-    print(s)
+    fS = FileSystem()
+    fS.cwd = "/home/user"
+    result:str = pwd(fS)
+    print(result)
