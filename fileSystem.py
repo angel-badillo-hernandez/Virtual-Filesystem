@@ -1,27 +1,60 @@
 # Filesystem Starter Class
 
-from sqliteCRUD import SQLiteconn
+import sqlite3
+from pypika import Table, Query, Field
 from prettytable import PrettyTable
 
-
 class FileSystem:
-    def __init__(self,db_name=None):
-        if not db_name:
-            self.db_name = "filesystem.sqlite"
-        else:
-            self.db_name = db_name
-        self.crud = SQLiteconn(db_name)
+
+    def __delattr__(self, __name: str) -> None:
+        pass
+
+    def __init__(self,db_name:str | None= None, table_name:str | None = None) -> None:
+        
+        self.table_name = table_name if table_name else "FileSystem"
+        self.db_name = db_name if db_name else "fileSystem.sqlite"
+
+        # Establish connection to database
+        conn:sqlite3.Connection = sqlite3.connect(self.db_name)
+        cursor:sqlite3.Cursor = conn.cursor()
+
         self.cwd = "/"
         self.cwdid = 0
+        self.columns_info = ["id INTEGER PRIMARY KEY", "pid INTEGER", "name TEXT",
+                             "created_date TEXT", "modified_date TEXT", "size REAL","type TEXT","owner TEXT","groop TEXT","permissions TEXT"]
+        self.__create_table(self.columns_info)
 
-    def __getFileId(self,**kwargs) -> int:
+    def __create_table(self, columns_info:list[str] | None = None) -> None:
+        """
+        Params:
+            table_name (str) - name of table
+            columns (list) - ["id INTEGER PRIMARY KEY", "name TEXT", "created TEXT", "modified TEXT", "size REAL","type TEXT","owner TEXT","owner_group TEXT","permissions TEXT"]
+
+        Create a new table with specified columns.
+
+        Args:
+            table_name (str): Name of the table.
+            columns (list): List of column definitions.
+        """
+
+        conn:sqlite3.Connection = sqlite3.connect(self.db_name)
+        cursor:sqlite3.Cursor = conn.cursor()
+
+        try:
+            # Create a table with the given columns
+            create_table_query:str = (
+                f"CREATE TABLE IF NOT EXISTS {table_name} ({', '.join(columns)});"
+            )
+            cursor.execute(create_table_query)
+            conn.commit()
+            print(f"Table '{table_name}' created successfully.")
+        except sqlite3.Error as e:
+            print(f"Error creating table: {e}")
+
+    def __getFileId(self, path:str) -> int:
         """ Find a file id using current location + name
         """
-        path:str = kwargs.get("path", None)
-
-        # Return -1 if no path specified
-        if not path:
-            return -1
+        pass
         
     def ls(self, **kwargs)->str:
         pass        
@@ -87,14 +120,14 @@ if __name__ == "__main__":
         (10, 9, 'File6.txt', '2023-09-25 13:15:00', '2023-09-25 13:15:00', 3072.25, 'file', 'user5', 'group5', 'rwxr-xr--'),
     ]
 
-    conn = SQLiteconn("testfilesystem.sqlite")
+    conn = FileSystem("testfilesystem.sqlite")
 
-    conn.drop_table(table_name)
+    # conn.drop_table(table_name)
 
-    conn.create_table(table_name, columns)
-    print(conn.describe_table(table_name))
+    # conn.create_table(table_name, columns)
+    # print(conn.describe_table(table_name))
 
-    for row in test_data:
-        conn.insert_data(table_name, row)
+    # for row in test_data:
+    #     conn.insert_data(table_name, row)
 
-    print(conn.formatted_print(table_name))
+    # print(conn.formatted_print(table_name))
