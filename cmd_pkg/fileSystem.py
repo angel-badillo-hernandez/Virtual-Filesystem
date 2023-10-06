@@ -3,6 +3,7 @@ import sqlite3
 from pypika import *
 import csv
 from datetime import datetime
+
 class FileSystem:
 
     def __init__(self,db_name:str | None= None, table_name:str | None = None, columns_info:list[tuple[str,str]] = None) -> None:
@@ -93,7 +94,6 @@ class FileSystem:
 
             for record in data:
                 self.insertEntry(record)
-
 
     def get_id(self, path:str) -> int:
         """ Find a file id using current location + name
