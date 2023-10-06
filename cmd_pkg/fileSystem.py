@@ -3,6 +3,7 @@ import os
 #from pypika import Table, Query, Field, Column, Order
 from pypika import *
 import csv
+from types import SimpleNamespace
 from datetime import datetime
 
 def path_split(path:str)-> list[str]:
@@ -21,6 +22,45 @@ def path_split(path:str)-> list[str]:
                 break
 
         return parts[::-1]  # Reverse the list
+
+class Entry:
+    def __init__(self, record:tuple | None = None) -> None:
+        """
+        Creates instance of Entry
+        """
+        self.id:int = None
+        self.pid:int = None
+        self.file_name:str = None
+        self.file_type:str = None
+        self.file_size:float = None
+        self.owner_name:str = None
+        self.group_name:str = None
+        self.permissions:str = None
+        self.modification_time:str = None
+        self.content:bytes = None
+
+        if not record:
+            return
+        
+        dictRecord:dict = dict(zip(dict(self).keys(), record))
+        
+        for key, value in dictRecord.items():
+            setattr(self, key, value)
+
+    def __iter__(self):
+        yield "id", self.id
+        yield "pid", self.pid
+        yield "file_name", self.file_name
+        yield "file_type", self.file_type
+        yield "file_size", self.file_size
+        yield "owner_name", self.owner_name
+        yield "group_name", self.group_name
+        yield "permissions", self.permissions
+        yield "modification_time", self.modification_time
+        yield "content", self.content
+    
+    def __str__(self) -> str:
+        return str(dict(self))
 
 class FileSystem:
 
@@ -116,7 +156,7 @@ class FileSystem:
             data = csv.reader(file)
 
             for record in data:
-                self.insertEntry(record)
+                self.insert_entry(record)
 
     # TODO: Implement this
     def find_id(self, path:str) -> int:
@@ -160,7 +200,7 @@ class FileSystem:
         finally:
             conn.close()
 
-    def insertEntry(self, record:tuple) -> None:
+    def insert_entry(self, record:tuple) -> None:
         """
         Insert a file into the table of the fileSystem database.
         """
@@ -179,16 +219,52 @@ class FileSystem:
             conn.close()
     
     # TODO: Implement this
-    def removeEntry(self, path:str) -> bool:
+    def remove_entry(self, path:str) -> bool:
         """
         """
         pass
 
     # TODO: Implement this
-    def pathExists(self, path:str) -> bool:
+    def path_exists(self, path:str) -> bool:
         """
         """
         pass
+
+    # TODO: Implement this
+    def path_stats(self, path:str, i:int) -> Entry | None:
+        """
+        Returns the information of an entry in the file system.
+        """
+        # If path does not exist, return None
+        if self.path_exists(path):
+            return None
+        
+        entry:Entry = None
+        entry_id:int = None
+
+        conn:sqlite3.Connection = sqlite3.connect(self.db_name)
+        cursor:sqlite3.Cursor = conn.cursor()
+        
+        try:
+            entry_id:int = self.find_id(path)
+
+            query:str = Query.from_(self.table_name).select("*").where(
+                Field("id") == 1).get_sql()
+            
+            cursor.execute(query)
+
+            record:tuple = cursor.fetchone()
+            print(record)
+            if not record:
+                return None
+            else:
+                entry = Entry(record)
+                return entry
+
+        except sqlite3.Error as e:
+            print(f"Error: {e}")
+        finally:
+            conn.close()
 
 # Example usage:
 if __name__ == "__main__":
@@ -198,5 +274,9 @@ if __name__ == "__main__":
 
     path = "/home/angel/Fortnite.exe"
 
-    p = path_split(path)
-    print(p)
+    # p = path_split(path)
+    # print(p)
+
+    nextId = fileSystem.next_id()
+    res = fileSystem.path_stats(path, 1)
+    #print(res)

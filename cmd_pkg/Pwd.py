@@ -1,4 +1,4 @@
-from .fileSystem import FileSystem
+from .fileSystem import *
 from .TockenizeFlags import tockenizeFlags
 from .InvalidFlagsMsg import invalidFlagsMsg
 
@@ -30,12 +30,11 @@ def pwd(fileSystem:FileSystem, **kwargs)-> str:
         result = pwd.__doc__
     # If other valid flags or none
     else:
-        result = fileSystem.cwd
+        result = fileSystem.get_cwd()
     
     return result
 
 if __name__ == "__main__":
     fS = FileSystem()
-    fS.cwd = "/home/user"
     result:str = pwd(fS)
     print(result)
