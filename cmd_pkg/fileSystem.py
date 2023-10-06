@@ -1,6 +1,8 @@
 import sqlite3
-from pypika import Table, Query, Field, Column
-
+#from pypika import Table, Query, Field, Column, Order
+from pypika import *
+import csv
+from datetime import datetime
 class FileSystem:
 
     def __init__(self,db_name:str | None= None, table_name:str | None = None, columns_info:list[tuple[str,str]] = None) -> None:
@@ -14,7 +16,8 @@ class FileSystem:
             ("file_type", "TEXT"),
             ("file_size", "REAL"), 
             ("owner_name", "TEXT"),
-            ("group_name", "REAL"), 
+            ("group_name", "TEXT"),
+            ("permissions", "TEXT"), 
             ("modification_time", "TEXT"),
             ("content", "BLOB")
         ]
@@ -49,7 +52,7 @@ class FileSystem:
         finally:
             conn.close()
 
-    def drop_table(self, table_name:str | None) -> bool:
+    def drop_table(self, table_name:str | None = None) -> bool:
         """
         Drop a table by name, optional parameter deletes specified table.
         If table_name is not passed in, uses self.table_name.
@@ -75,11 +78,80 @@ class FileSystem:
         finally:
             conn.close()
 
-    def __getFileId(self, path:str) -> int:
+    def csv_to_table(self, file_name:str, table_name:str | None=None) -> None:
+        """
+        Put data from CSV into database.
+        """
+
+        table_name = table_name if table_name else self.table_name
+
+        with open(file_name) as file:
+            data = csv.reader(file)
+
+            for record in data:
+                self.insertEntry(record)
+
+
+    def get_id(self, path:str) -> int:
         """ Find a file id using current location + name
+        """
+
+        pass
+    
+    def next_id(self) -> int:
+        """
+        Returns next available ID.
+        """
+        
+        conn:sqlite3.Connection = sqlite3.connect(self.db_name)
+        cursor:sqlite3.Cursor = conn.cursor()
+        try:
+            query:str = Query.from_(self.table_name).select("id"
+            ).orderby("id", order=Order.desc).limit(1).get_sql()
+
+            cursor.execute(query)
+
+            temp:tuple = cursor.fetchone()
+            
+            nextId:int | None = temp[0] + 1 if temp else 1
+            return nextId
+        except sqlite3.Error as e:
+            print(f"Error: {e}")
+        finally:
+            conn.close()
+
+    def insertEntry(self, record:tuple) -> None:
+        """
+        Insert a file into the table of the fileSystem database.
+        """
+
+        conn:sqlite3.Connection = sqlite3.connect(self.db_name)
+        cursor:sqlite3.Cursor = conn.cursor()
+
+        try:
+            query:str = Query.into(self.table_name).insert(*record).get_sql()
+            cursor.execute(query)
+            conn.commit()
+
+        except sqlite3.Error as e:
+            print(f"Error: {e}")
+        finally:
+            conn.close()
+
+        pass
+  
+    def removeEntry(self, path:str) -> bool:
+        """
         """
         pass
 
+    def pathExists(self, path:str) -> bool:
+        """
+        """
+        
 # Example usage:
 if __name__ == "__main__":
     fileSystem = FileSystem()
+
+    fileSystem.create_table()
+    fileSystem.insertEntry((fileSystem.next_id(), 2, "Fortnite.py", "file", 0, "user", "user", "2017-11-03 16:28:42", "Fortnite is so kweel"))
