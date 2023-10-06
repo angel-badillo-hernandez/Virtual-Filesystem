@@ -26,7 +26,9 @@ def path_split(path:str)-> list[str]:
 class Entry:
     def __init__(self, record:tuple | None = None) -> None:
         """
-        Creates instance of Entry
+        Creates instance of Entry. Creates Entry using tuple with
+        corresponding values. If record is None, then creates Entry with
+        all attributes set to None.
         """
         self.id:int = None
         self.pid:int = None
@@ -43,11 +45,14 @@ class Entry:
             return
         
         dictRecord:dict = dict(zip(dict(self).keys(), record))
-        
+
         for key, value in dictRecord.items():
             setattr(self, key, value)
 
     def __iter__(self):
+        """
+        Allows casting Entry to iterables such as list, tuple, and dict.
+        """
         yield "id", self.id
         yield "pid", self.pid
         yield "file_name", self.file_name
@@ -249,12 +254,11 @@ class FileSystem:
             entry_id:int = self.find_id(path)
 
             query:str = Query.from_(self.table_name).select("*").where(
-                Field("id") == 1).get_sql()
+                Field("id") == entry_id).get_sql()
             
             cursor.execute(query)
 
             record:tuple = cursor.fetchone()
-            print(record)
             if not record:
                 return None
             else:
@@ -274,9 +278,10 @@ if __name__ == "__main__":
 
     path = "/home/angel/Fortnite.exe"
 
-    # p = path_split(path)
-    # print(p)
+    p = path_split(path)
+    print(p)
 
     nextId = fileSystem.next_id()
     res = fileSystem.path_stats(path, 1)
-    #print(res)
+    print(res)
+    print(res.file_name)
