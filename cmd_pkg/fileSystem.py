@@ -85,6 +85,9 @@ class FileSystem:
 
         table_name = table_name if table_name else self.table_name
 
+        self.drop_table()
+        self.create_table()
+
         with open(file_name) as file:
             data = csv.reader(file)
 
@@ -153,5 +156,4 @@ class FileSystem:
 if __name__ == "__main__":
     fileSystem = FileSystem()
 
-    fileSystem.create_table()
-    fileSystem.insertEntry((fileSystem.next_id(), 2, "Fortnite.py", "file", 0, "user", "user", "2017-11-03 16:28:42", "Fortnite is so kweel"))
+    fileSystem.csv_to_table("fakeFileData.csv")
