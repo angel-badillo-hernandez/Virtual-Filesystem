@@ -80,7 +80,7 @@ class FileSystem:
 
     def csv_to_table(self, file_name:str, table_name:str | None=None) -> None:
         """
-        Put data from CSV into database.
+        Put data from CSV into database table.
         """
 
         table_name = table_name if table_name else self.table_name
