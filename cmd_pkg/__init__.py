@@ -18,4 +18,4 @@ from .Grep import grep
 from .Head import head
 from .Tail import tail
 from .Less import less
-from .fileSystem import FileSystem
+from .fileSystem import *

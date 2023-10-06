@@ -1,8 +1,26 @@
 import sqlite3
+import os
 #from pypika import Table, Query, Field, Column, Order
 from pypika import *
 import csv
 from datetime import datetime
+
+def path_split(path:str)-> list[str]:
+        
+        head, tail = os.path.split(path)
+        parts:list[str] = []
+        
+        while True:
+            path, dir = os.path.split(path)
+
+            if dir != "":
+                parts.append(dir)
+            else:
+                if path != "":
+                    parts.append(path)
+                break
+
+        return parts[::-1]  # Reverse the list
 
 class FileSystem:
 
@@ -24,8 +42,13 @@ class FileSystem:
         ]
 
         self.cwd:str = "/"
-        self.cwdid:str = 0
     
+    def get_cwd(self)-> str:
+        return self.cwd
+
+    def set_cwd(self, path:str) -> None:
+        self.cwd = path
+
     def create_table(self, table_name:str | None = None, columns_info:list[tuple[str,str]] | None = None) -> bool:
         """
         Create a new table with specified columns, if it does not already exist.
@@ -95,11 +118,25 @@ class FileSystem:
             for record in data:
                 self.insertEntry(record)
 
-    def get_id(self, path:str) -> int:
-        """ Find a file id using current location + name
+    # TODO: Implement this
+    def find_id(self, path:str) -> int:
+        """ Find id of entry given the path
         """
 
-        pass
+        parts:list[str] = path_split(path)
+
+        conn:sqlite3.Connection = sqlite3.connect(self.db_name)
+        cursor:sqlite3.Cursor = conn.cursor()
+
+        try:
+            query:str = ""
+            cursor.execute(query)
+            conn.commit()
+
+        except sqlite3.Error as e:
+            print(f"Error: {e}")
+        finally:
+            conn.close()
     
     def next_id(self) -> int:
         """
@@ -140,20 +177,26 @@ class FileSystem:
             print(f"Error: {e}")
         finally:
             conn.close()
-
-        pass
-  
+    
+    # TODO: Implement this
     def removeEntry(self, path:str) -> bool:
         """
         """
         pass
 
+    # TODO: Implement this
     def pathExists(self, path:str) -> bool:
         """
         """
-        
+        pass
+
 # Example usage:
 if __name__ == "__main__":
     fileSystem = FileSystem()
 
     fileSystem.csv_to_table("fakeFileData.csv")
+
+    path = "/home/angel/Fortnite.exe"
+
+    p = path_split(path)
+    print(p)
