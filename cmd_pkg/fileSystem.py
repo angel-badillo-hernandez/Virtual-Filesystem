@@ -65,6 +65,9 @@ class Entry:
         yield "content", self.content
     
     def __str__(self) -> str:
+        """
+        Cast Entry to str. Output matches that of a dict.
+        """
         return str(dict(self))
 
 class FileSystem:
