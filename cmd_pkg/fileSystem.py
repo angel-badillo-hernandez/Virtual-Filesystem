@@ -115,17 +115,16 @@ class FileSystem:
         """
         return self.cwd
 
-    # TODO: Implement
     def set_cwd(self, path: str) -> bool:
         """
         Changes the current working directory. Must be full path starting with "/".
         Returns True if successful, false otherwise.
         """
-        isValidPath:bool = self.path_exists(path) and self.is_dir(path)
+        isValidPath: bool = self.path_exists(path) and self.is_dir(path)
 
         if isValidPath:
             self.cwd = path
-        
+
         return isValidPath
 
     def create_table(
@@ -204,9 +203,9 @@ class FileSystem:
             data = csv.reader(file)
 
             for record in data:
-                self.insert_entry(record)
+                self.insert_entry(Entry(record))
 
-    def find_id(self, path: str) -> int:
+    def _find_id(self, path: str) -> int:
         """
         Returns id of given path. Returns -1 if does not exist.
         Must be full path beginning with "/".
@@ -241,7 +240,7 @@ class FileSystem:
 
         return curr_id
 
-    def next_id(self) -> int:
+    def _next_id(self) -> int:
         """
         Returns next available ID.
         """
@@ -268,15 +267,19 @@ class FileSystem:
         finally:
             conn.close()
 
-    def insert_entry(self, record: tuple) -> None:
+    # NOTE: This is does not validate data, it must be in the correct format.
+    def insert_entry(self, record: tuple | Entry) -> None:
         """
-        Insert a file into the table of the fileSystem database.
+        Insert an entry into the table of the fileSystem database.
         """
 
         conn: sqlite3.Connection = sqlite3.connect(self.db_name)
         cursor: sqlite3.Cursor = conn.cursor()
 
         try:
+            if isinstance(record, Entry):
+                record = dict(record).values()
+
             query: str = Query.into(self.table_name).insert(*record).get_sql()
             cursor.execute(query)
             conn.commit()
@@ -286,9 +289,10 @@ class FileSystem:
         finally:
             conn.close()
 
+    # NOTE: This removes an entire row in db with no regard if it is a file.
     def remove_entry(self, path: str) -> bool:
         """
-        Removes an entry, if it exists. Returns true if removed,
+        Removes an entry, if it exists. Returns True if removed,
         false otherwise.
         """
         if not self.path_exists(path):
@@ -298,7 +302,7 @@ class FileSystem:
         cursor: sqlite3.Cursor = conn.cursor()
 
         try:
-            entry_id: int = self.find_id(path)
+            entry_id: int = self._find_id(path)
 
             query: str = (
                 Query.from_(self.table_name)
@@ -362,7 +366,7 @@ class FileSystem:
         cursor: sqlite3.Cursor = conn.cursor()
 
         try:
-            entry_id: int = self.find_id(path)
+            entry_id: int = self._find_id(path)
 
             query: str = (
                 Query.from_(self.table_name)
@@ -382,12 +386,81 @@ class FileSystem:
         finally:
             conn.close()
 
-    # TODO: Implement
-    def is_dir(self, path:str) -> bool:
+    def is_dir(self, absolute_path: str) -> bool:
+        """
+        Checks if path is a directory.
+        Returns True if exists and file_type is a directory.
+        Returns False if does not exist or file_type is file.
+        """
+        entry: Entry = self.stats(absolute_path)
+
+        return entry.file_type == "directory"
+
+    def is_file(self, absolute_path: str) -> bool:
+        """
+        Checks if path is a directory.
+        Returns True if exists and file_type is a file
+        Returns False if does not exist or file_type is directory.
+        """
+        entry: Entry = self.stats(absolute_path)
+
+        return entry.file_type == "file"
+
+    def abs_path(self, path: str) -> str:
+        """
+        Returns absolute path, and normalizes path.
+        I.e, processes '.', '..', etc.
+        """
+        return os.path.normpath(f"{self.get_cwd()}{path}")
+
+    def norm_path(self, path: str) -> str:
+        """
+        Returns normalizes path.
+        I.e, processes '.', '..', etc.
+        """
+        return os.path.normpath(path)
+
+    #TODO: Implement
+    def list_dir(self, absolute_path:str) -> list[Entry]:
+        """
+        Returns all entries within a directory.
+        """
+
+        conn:sqlite3.Connection = sqlite3.connect(self.db_name)
+        cursor:sqlite3.Cursor = conn.cursor()
+        entries:list[Entry] = []
+
+        try:
+            pass
+        except sqlite3.Error as e:
+            print(f"Error: {e}")
+        finally:
+            conn.close()
+
+        return entries
+
+    #TODO: Implement
+    def chmod(self, absolute_path:str, mode:int) -> None:
         pass
 
     # TODO: Implement
-    def is_file(self, path:str) -> bool:
+    def copy_file(self, absolute_src:str, absolute_dest:str) -> None:
+        pass
+
+    # TODO: Implement
+    def move(self, absolute_src:str, absolute_dest:str) -> None:
+        pass
+    
+    # TODO: Implement
+    def make_dir(self, absolute_path:str) -> None:
+        pass
+
+    # TODO: Implement
+    def remove(self, absolute_path:str) -> None:
+        pass
+
+    # TODO: Implement
+    def remove_tree(self, absolute_path:str) -> None:
         pass
 
 # Example usage:
@@ -396,5 +469,12 @@ if __name__ == "__main__":
 
     fileSystem.csv_to_table("fakeFileData.csv")
 
-    path = "/home/angel"
-    print(fileSystem.stats(path))
+    path = "/home/angel/"
+    print(fileSystem.is_dir(path))
+
+    print(fileSystem.set_cwd(path))
+
+    print(fileSystem.get_cwd())
+
+    entry = fileSystem.stats(path)
+    print(tuple(entry))
