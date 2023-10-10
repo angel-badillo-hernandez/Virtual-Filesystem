@@ -1,5 +1,4 @@
-import sqlite3, os, csv
-import errno
+import sqlite3, os, csv, errno, stat
 from pypika import Table, Query, Field, Column, Order
 from datetime import datetime
 
@@ -492,14 +491,19 @@ def chmod(path: str, mode: int) -> None:
 
     conn: sqlite3.Connection = sqlite3.connect(_db_path)
     cursor: sqlite3.Cursor = conn.cursor()
-    fullMode:int = mode
+
     if is_dir(path):
-        fullMode += 0o40000
+        mode += 0o40000
     else:
-        fullMode += 0o100000
+        mode += 0o100000
+
+    modeStr:str = stat.filemode(mode)    
 
     try:
-        query:str = Query.from_(_table_name)
+        entry_id:int = _find_id(path)
+        query:str = Query.update(_table_name).set(Field("permissions"), modeStr).where(Field("id") == entry_id).get_sql()
+        cursor.execute(query)
+        conn.commit()
     except sqlite3.Error as e:
         print(f"Error: {e}")
     finally:
@@ -644,4 +648,7 @@ if __name__ == "__main__":
 
     # drop_table()
     csv_to_table("fakeFileData.csv")
-    # remove_tree("home/angel")
+    chmod("/home/angel", 0o777)
+    print(stats("/home/angel"))
+    chmod("home/angel/Fortnite.exe", 0o777)
+    print(stats("home/angel/Fortnite.exe"))
