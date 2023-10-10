@@ -1,6 +1,6 @@
 import sqlite3, os, csv, errno, stat
 from pypika import Table, Query, Field, Column, Order
-from datetime import datetime
+import datetime
 
 _db_path: str = "fileSystem.sqlite" # Global var for keeping track of path to database file
 
@@ -75,17 +75,28 @@ class Entry:
         return str(self)
 
 
-def _throw_FileNotFoundErr(path: str):
+def _throw_FileNotFoundError(path: str):
+    """
+    Raises FileNotFoundError with given path.
+    """
     raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), path)
 
 
-def _throw_NotADirectoryErr(path: str):
+def _throw_NotADirectoryError(path: str):
+    """
+    Raises NotADirectoryError with given path.
+    """
     raise NotADirectoryError(errno.ENOTDIR, os.strerror(errno.ENOTDIR), path)
 
 
-def _throw_IsADirectory(path: str):
+def _throw_IsADirectoryError(path: str):
+    """
+    Raises IsADirectoryError with given path.
+    """
     raise IsADirectoryError(errno.EISDIR, os.strerror(errno.EISDIR), path)
 
+def _throw_FileExistsError(path:str):
+    raise FileExistsError(errno.EEXIST, os.strerror(errno.EEXIST), path)
 
 def path_split(path: str) -> list[str]:
     """
@@ -113,29 +124,39 @@ def path_split(path: str) -> list[str]:
 
 
 def set_db_path(path: str) -> None:
+    """
+    Set path to database file.
+    """
     global _db_path
     _db_path = path
 
 
 def get_db_path() -> str:
+    """
+    Get path to database file.
+    """
     return _db_path
 
 
 def set_table_name(table_name: str) -> None:
+    """
+    Set table name.
+    """
     global _table_name
     _table_name = table_name
 
 
 def get_table_name() -> str:
+    """
+    Get table name.
+    """
     return _table_name
-
-# NOTE: This should probably be removed, most stuff is dependent on column names...
-# def set_columns_info(columns_info: list[tuple[str, str]]) -> None:
-#     global _columns_info
-#     _columns_info = columns_info
 
 
 def get_columns_info() -> list[tuple[str, str]]:
+    """
+    Get columns info.
+    """
     return _columns_info
 
 
@@ -149,14 +170,15 @@ def get_cwd() -> str:
 def set_cwd(path: str) -> None:
     """
     Changes the current working directory. Must be full path starting with "/".
-    Raises FileNotFoundError if not file
+    Raises FileNotFoundError if path does not exist. Raises NotADirectoryError 
+    if path is not a directory.
     """
     path = abs_path(path)
 
     if not path_exists(path):
-        _throw_FileNotFoundErr(path)
+        _throw_FileNotFoundError(path)
     elif not is_dir(path):
-        _throw_NotADirectoryErr(path)
+        _throw_NotADirectoryError(path)
     else:
         global _cwd
         _cwd = path
@@ -247,7 +269,7 @@ def _find_id(path: str) -> int:
     Returns id of given path. Returns -1 if does not exist.
     Must be full path beginning with "/".
     """
-
+    path = abs_path(path)
     parts: list[str] = path_split(path)
     conn: sqlite3.Connection = sqlite3.connect(_db_path)
     cursor: sqlite3.Cursor = conn.cursor()
@@ -312,6 +334,7 @@ def _next_id() -> int:
 def _insert_entry(record: tuple | Entry) -> None:
     """
     Insert an entry into the table of the fileSystem database.
+    Does not validate data. Must be correct format.
     """
 
     conn: sqlite3.Connection = sqlite3.connect(_db_path)
@@ -373,7 +396,7 @@ def stats(path: str) -> Entry:
     path = abs_path(path)
 
     if not path_exists(path):
-        _throw_FileNotFoundErr(path)
+        _throw_FileNotFoundError(path)
 
     entry: Entry = None
     entry_id: int = None
@@ -445,9 +468,9 @@ def list_dir(path: str) -> list[Entry]:
     path = abs_path(path)
 
     if not path_exists(path):
-        _throw_FileNotFoundErr(path)
+        _throw_FileNotFoundError(path)
     if not is_dir(path):
-        _throw_NotADirectoryErr(path)
+        _throw_NotADirectoryError(path)
 
     conn: sqlite3.Connection = sqlite3.connect(_db_path)
     cursor: sqlite3.Cursor = conn.cursor()
@@ -481,7 +504,7 @@ def chmod(path: str, mode: int) -> None:
     path = abs_path(path)
 
     if not path_exists(path):
-        _throw_FileNotFoundErr(path)
+        _throw_FileNotFoundError(path)
 
     conn: sqlite3.Connection = sqlite3.connect(_db_path)
     cursor: sqlite3.Cursor = conn.cursor()
@@ -531,7 +554,33 @@ def move(src: str, dest: str) -> None:
 
 
 def make_dir(path: str) -> None:
-    pass
+    """
+    Create directory if does not exist.
+    """
+    path = abs_path(path)
+    
+    if path_exists(path):
+        _throw_FileExistsError(path)
+
+    parent, dest = os.path.split(path)
+
+    if not path_exists(parent):
+        _throw_FileNotFoundError(parent)
+
+    pid:int = _find_id(parent)
+    new_dir:Entry = Entry()
+    new_dir.id = _next_id()
+    new_dir.pid = pid
+    new_dir.file_name = dest
+    new_dir.file_type = "directory"
+    new_dir.file_size = 0
+    new_dir.modification_time = datetime.datetime.fromtimestamp(datetime.datetime.now().timestamp()).isoformat(sep=" ", timespec="seconds")
+    new_dir.permissions = stat.filemode(0o40777)
+    new_dir.owner_name = "user"
+    new_dir.group_name = "user"
+    new_dir.content = ""
+
+    _insert_entry(new_dir)
 
 
 def remove(path: str) -> None:
@@ -541,9 +590,9 @@ def remove(path: str) -> None:
     path: str = abs_path(path)
 
     if not path_exists(path):
-        _throw_FileNotFoundErr(path)
+        _throw_FileNotFoundError(path)
     elif not is_file(path):
-        _throw_IsADirectory(path)
+        _throw_IsADirectoryError(path)
 
     conn: sqlite3.Connection = sqlite3.connect(_db_path)
     cursor: sqlite3.Cursor = conn.cursor()
@@ -569,9 +618,9 @@ def remove_tree(path: str) -> None:
     path: str = abs_path(path)
 
     if not path_exists(path):
-        _throw_FileNotFoundErr(path)
+        _throw_FileNotFoundError(path)
     elif not is_dir(path):
-        _throw_NotADirectoryErr(path)
+        _throw_NotADirectoryError(path)
 
     conn: sqlite3.Connection = sqlite3.connect(_db_path)
     cursor: sqlite3.Cursor = conn.cursor()
@@ -648,10 +697,11 @@ if __name__ == "__main__":
 
     # drop_table()
     csv_to_table("fakeFileData.csv")
-    chmod("/home/angel", 0o777)
-    print(stats("/home/angel"))
-    chmod("home/angel/Fortnite.exe", 0o777)
-    print(stats("home/angel/Fortnite.exe"))
-    set_cwd("home/angel")
-    print(abs_path("/"))
-    print(list_dir("/"))
+    # chmod("/home/angel", 0o777)
+    # print(stats("/home/angel"))
+    # chmod("home/angel/Fortnite.exe", 0o777)
+    # print(stats("home/angel/Fortnite.exe"))
+    # set_cwd("home/angel")
+    # print(abs_path("/"))
+    # print(list_dir("/"))
+    make_dir("/home/angel/Fortnite")
