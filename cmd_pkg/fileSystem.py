@@ -482,10 +482,28 @@ def list_dir(path: str) -> list[Entry]:
 
 
 # TODO: Implement
-
+# Takes in an octal value
 
 def chmod(path: str, mode: int) -> None:
-    pass
+    path = abs_path(path)
+
+    if not path_exists(path):
+        _throw_FileNotFoundErr(path)
+
+    conn: sqlite3.Connection = sqlite3.connect(_db_path)
+    cursor: sqlite3.Cursor = conn.cursor()
+    fullMode:int = mode
+    if is_dir(path):
+        fullMode += 0o40000
+    else:
+        fullMode += 0o100000
+
+    try:
+        query:str = Query.from_(_table_name)
+    except sqlite3.Error as e:
+        print(f"Error: {e}")
+    finally:
+        conn.close()
 
 
 # TODO: Implement

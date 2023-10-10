@@ -46,8 +46,10 @@ def cd(**kwargs)-> str:
             
             try:
                 fileSystem.set_cwd(param)
-            except (FileNotFoundError, NotADirectoryError) as e:
+            except FileNotFoundError as e:
                 result = f"{cd.__name__}: '{param}': No such directory"
+            except NotADirectoryError as e:
+                result = f"{cd.__name__}: '{param}': Not a directory"
 
     return result
 
