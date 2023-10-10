@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-import os
+from . import fileSystem
 from .TockenizeFlags import tockenizeFlags
 from .InvalidFlagsMsg import invalidFlagsMsg
 
@@ -32,12 +31,9 @@ def mkdir(**kwargs)-> str:
     # If other valid flags or none
     else:
         for param in params:
-            # Replace tilde with user directory
-            if param.startswith("~"):
-                param = param.replace("~", os.path.expanduser("~"), 1)
             
             try:
-                os.mkdir(param)
+                fileSystem.make_dir(param)
             except(FileExistsError):
                 result = f"{mkdir.__name__}: cannot create directory '{param}': File exists"
             except(FileNotFoundError):
@@ -48,5 +44,5 @@ def mkdir(**kwargs)-> str:
     return result
 
 if __name__ == "__main__":
-    s= mkdir(params=[], flags=[])
+    s= mkdir(params=["/oof/a"], flags=[])
     print(s)

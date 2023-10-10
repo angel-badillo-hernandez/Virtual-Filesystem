@@ -526,22 +526,35 @@ def chmod(path: str, mode: int) -> None:
     finally:
         conn.close()
 
-
-# TODO: Implement
 def copy_file(src: str, dest: str) -> None:
-
+    """
+    """
     src = abs_path(src)
     dest = abs_path(dest)
     
-    conn:sqlite3.Connection = sqlite3.connect(_db_path)
-    cursor:sqlite3.Cursor = conn.cursor()
-    try:
-        pass
-    except sqlite3.Error as e:
-        print(f"Error: {e}")
-    finally:
-        conn.close()
+    if not path_exists(src):
+        _throw_FileNotFoundError(src)
+    elif not is_file(src):
+        _throw_IsADirectoryError(src)
 
+    parent, new_file_name = os.path.split(dest)
+
+    if not path_exists(parent):
+        _throw_FileNotFoundError(parent)
+    elif not is_dir(parent):
+        _throw_NotADirectoryError(parent)
+    
+    if not new_file_name:
+        temp, new_file_name = os.path.split(src)
+    
+    pid:int = _find_id(parent)
+    new_file:Entry = stats(src)
+    new_file.file_name = new_file_name
+    new_file.pid = pid
+    new_file.id = _next_id()
+    new_file.modification_time = datetime.datetime.fromtimestamp(datetime.datetime.now().timestamp()).isoformat(sep=" ", timespec="seconds")
+
+    _insert_entry(new_file)
 
 # TODO: Implement
 
@@ -704,4 +717,6 @@ if __name__ == "__main__":
     # set_cwd("home/angel")
     # print(abs_path("/"))
     # print(list_dir("/"))
-    make_dir("/home/angel/Fortnite")
+    set_cwd("/home")
+    print(get_cwd())
+    make_dir("/oof/angel/Fortnite")

@@ -44,6 +44,6 @@ if __name__ == "__main__":
                 stdin=shellCmd.stdin,
                 stdout=shellCmd.stdout,
             )
-        else:
-            result = f"{shellCmd.name}: command not found"
             print(result)
+        else:
+            print(f"{shellCmd.name}: command not found")
