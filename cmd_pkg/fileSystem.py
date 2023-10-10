@@ -481,9 +481,10 @@ def list_dir(path: str) -> list[Entry]:
 
 
 # TODO: Implement
-# Takes in an octal value
-
 def chmod(path: str, mode: int) -> None:
+    """
+    Changes the permissions on a file/directory given octal 3-digit number.
+    """
     path = abs_path(path)
 
     if not path_exists(path):

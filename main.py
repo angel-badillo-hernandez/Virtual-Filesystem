@@ -28,7 +28,7 @@ def prompt() -> str:
 if __name__ == "__main__":
     fileSystem.set_db_path(DB_PATH)
     fileSystem.set_table_name(TABLE_NAME)
-    fileSystem.csv_to_table(CSV_FILE)
+    #fileSystem.csv_to_table(CSV_FILE)
 
     while True: # Exits when `exit` is entered
         cmdStr = input(prompt())

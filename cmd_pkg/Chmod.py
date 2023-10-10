@@ -1,5 +1,5 @@
-#!/usr/bin/env python3
 import os, sys, stat
+from . import fileSystem
 from stat import *
 from .TockenizeFlags import tockenizeFlags
 from .InvalidFlagsMsg import invalidFlagsMsg
@@ -93,7 +93,7 @@ def chmod(**kwargs)-> str:
                     mode |= 0o001  # Add execute permission (others)
                 
                 # Apply the new permisssions to the file
-                result = os.chmod(path, mode, follow_symlinks=True)
+                result = fileSystem.chmod(path, mode)
                 message = "".join(f"Changed permissions of {params[1]} to {permissions}.")
                 return message
         except ValueError:
