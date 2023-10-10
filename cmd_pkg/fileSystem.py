@@ -537,7 +537,7 @@ def remove(path: str) -> None:
         conn.close()
 
 
-#TODO: Implement
+# TODO: Implement
 
 
 def remove_tree(path: str) -> None:
