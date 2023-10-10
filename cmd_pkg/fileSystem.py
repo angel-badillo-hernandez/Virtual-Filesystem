@@ -2,6 +2,24 @@ import sqlite3, os, csv, errno, stat
 from pypika import Table, Query, Field, Column, Order
 from datetime import datetime
 
+_db_path: str = "fileSystem.sqlite" # Global var for keeping track of path to database file
+
+_table_name: str = "FileSystem" # Global var for keeping track of path to table name
+
+_columns_info: list[tuple[str, str]] = [ # Global var for keeping track of column names
+    ("id", "INTEGER PRIMARY KEY"),
+    ("pid", "INTEGER"),
+    ("file_name", "TEXT"),
+    ("file_type", "TEXT"),
+    ("file_size", "REAL"),
+    ("owner_name", "TEXT"),
+    ("group_name", "TEXT"),
+    ("permissions", "TEXT"),
+    ("modification_time", "TEXT"),
+    ("content", "BLOB"),
+]
+
+_cwd: str = "/" # Global var for keeping track of current working directory
 
 class Entry:
     def __init__(self, record: tuple | None = None) -> None:
@@ -54,27 +72,7 @@ class Entry:
         """
         Returns str representation of instance of Entry. Similar to dict.
         """
-        return self.__str__()
-
-
-_db_path: str = "fileSystem.sqlite"
-
-_table_name: str = "FileSystem"
-
-_columns_info: list[tuple[str, str]] = [
-    ("id", "INTEGER PRIMARY KEY"),
-    ("pid", "INTEGER"),
-    ("file_name", "TEXT"),
-    ("file_type", "TEXT"),
-    ("file_size", "REAL"),
-    ("owner_name", "TEXT"),
-    ("group_name", "TEXT"),
-    ("permissions", "TEXT"),
-    ("modification_time", "TEXT"),
-    ("content", "BLOB"),
-]
-
-_cwd: str = "/"
+        return str(self)
 
 
 def _throw_FileNotFoundErr(path: str):
@@ -656,3 +654,4 @@ if __name__ == "__main__":
     print(stats("home/angel/Fortnite.exe"))
     set_cwd("home/angel")
     print(abs_path("/"))
+    print(list_dir("/"))
