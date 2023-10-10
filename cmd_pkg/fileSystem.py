@@ -132,10 +132,10 @@ def set_table_name(table_name: str) -> None:
 def get_table_name() -> str:
     return _table_name
 
-
-def set_columns_info(columns_info: list[tuple[str, str]]) -> None:
-    global _columns_info
-    _columns_info = columns_info
+# NOTE: This should probably be removed, most stuff is dependent on column names...
+# def set_columns_info(columns_info: list[tuple[str, str]]) -> None:
+#     global _columns_info
+#     _columns_info = columns_info
 
 
 def get_columns_info() -> list[tuple[str, str]]:
@@ -505,7 +505,7 @@ def move(src: str, dest: str) -> None:
 # TODO: Implement
 
 
-def make_dir(absolute_path: str) -> None:
+def make_dir(path: str) -> None:
     pass
 
 
@@ -555,14 +555,50 @@ def remove_tree(path: str) -> None:
     cursor: sqlite3.Cursor = conn.cursor()
 
     try:
-        entry_id: int = _find_id(path)
+        # Find id of top directory in tree
+        rootEntry_id: int = _find_id(path)
 
-        # query: str = (
-        #     Query.from_(_table_name).delete().where(Field("id") == entry_id).get_sql()
-        # )
+        # Query to retrieve id,pid for all entries that have their pid 
+        # set to rootEntry_id.
+        query: str = (
+            Query.from_(_table_name)
+            .select("id", "pid")
+            .where(Field("pid") == rootEntry_id)
+            .get_sql()
+        )
+        cursor.execute(query)
+        idPairs: list[tuple] = cursor.fetchall()
 
-        # cursor.execute(query)
-        # conn.commit()
+        i: int = 0
+        # Iterate over all id,pid pairs to retrieve all entries to delete
+        while i < len(idPairs):
+            query = (
+                Query.from_(_table_name)
+                .select("id", "pid")
+                .where(Field("pid") == idPairs[i][0])
+                .get_sql()
+            )
+            cursor.execute(query)
+            temp = cursor.fetchall()
+            idPairs.extend(temp)
+            i += 1
+
+        # Remove all entries belonging to the top directory in tree
+        for id, pid in idPairs:
+            query: str = (
+                Query.from_(_table_name).delete().where(Field("id") == id).get_sql()
+            )
+            cursor.execute(query)
+
+        # Remove top directory in tree
+        query: str = (
+            Query.from_(_table_name)
+            .delete()
+            .where(Field("id") == rootEntry_id)
+            .get_sql()
+        )
+        cursor.execute(query)
+        conn.commit()
     except sqlite3.Error as e:
         print(f"Error: {e}")
     finally:
@@ -588,6 +624,6 @@ if __name__ == "__main__":
     except ImportError:
         pass
 
+    # drop_table()
     csv_to_table("fakeFileData.csv")
-    print(list_dir("."))
-    print(path_exists("."))
+    # remove_tree("home/angel")

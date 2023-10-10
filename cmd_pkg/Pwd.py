@@ -1,6 +1,6 @@
-import fileSystem
-from TockenizeFlags import tockenizeFlags
-from InvalidFlagsMsg import invalidFlagsMsg
+from . import fileSystem
+from .TockenizeFlags import tockenizeFlags
+from .InvalidFlagsMsg import invalidFlagsMsg
 
 pwd_flags:set[str] = {
     "--help"
