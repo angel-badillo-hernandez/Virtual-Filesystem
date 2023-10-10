@@ -440,9 +440,6 @@ def norm_path(path: str) -> str:
     return os.path.normpath(path)
 
 
-# TODO: Implement
-
-
 def list_dir(path: str) -> list[Entry]:
     """
     Returns all entries within a directory.
@@ -479,8 +476,6 @@ def list_dir(path: str) -> list[Entry]:
 
     return entries
 
-
-# TODO: Implement
 def chmod(path: str, mode: int) -> None:
     """
     Changes the permissions on a file/directory given octal 3-digit number.
@@ -512,10 +507,19 @@ def chmod(path: str, mode: int) -> None:
 
 
 # TODO: Implement
-
-
 def copy_file(src: str, dest: str) -> None:
-    pass
+
+    src = abs_path(src)
+    dest = abs_path(dest)
+    
+    conn:sqlite3.Connection = sqlite3.connect(_db_path)
+    cursor:sqlite3.Cursor = conn.cursor()
+    try:
+        pass
+    except sqlite3.Error as e:
+        print(f"Error: {e}")
+    finally:
+        conn.close()
 
 
 # TODO: Implement
@@ -558,9 +562,6 @@ def remove(path: str) -> None:
         print(f"Error: {e}")
     finally:
         conn.close()
-
-
-# TODO: Implement
 
 
 def remove_tree(path: str) -> None:
@@ -653,3 +654,5 @@ if __name__ == "__main__":
     print(stats("/home/angel"))
     chmod("home/angel/Fortnite.exe", 0o777)
     print(stats("home/angel/Fortnite.exe"))
+    set_cwd("home/angel")
+    print(abs_path("/"))

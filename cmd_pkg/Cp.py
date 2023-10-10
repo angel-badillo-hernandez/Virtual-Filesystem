@@ -32,10 +32,6 @@ def cp(**kwargs)-> str:
     # If other valid flags or none
     else:
         if len(params) == 2:
-            for i in range(0, len(params)):
-                # Replace tilde with user directory
-                if params[i].startswith("~"):
-                    params[i] = params[i].replace("~", os.path.expanduser("~"), 1)
             try:
                 shutil.copyfile(params[0], params[1])
             except(FileNotFoundError, IsADirectoryError) as error:
