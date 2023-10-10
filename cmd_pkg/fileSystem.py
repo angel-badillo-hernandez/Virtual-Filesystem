@@ -51,6 +51,12 @@ class Entry:
         """
         return str(dict(self))
 
+    def __repr__(self) -> str:
+        """
+        Returns str representation of instance of Entry. Similar to dict.
+        """
+        return self.__str__()
+
 
 _db_path: str = "fileSystem.sqlite"
 
@@ -90,7 +96,7 @@ def path_split(path: str) -> list[str]:
     as a list.
     """
     # Remove trailing / to produce correct result
-    if path.endswith("/"):
+    if len(path) > 1 and path.endswith("/"):
         path = path.removesuffix("/")
 
     # head, tail = os.path.split(path)
@@ -275,7 +281,7 @@ def _find_id(path: str) -> int:
     return curr_id
 
 
-def _next_id(self) -> int:
+def _next_id() -> int:
     """
     Returns next available ID.
     """
@@ -406,6 +412,10 @@ def is_dir(path: str) -> bool:
     Returns False if does not exist or file_type is file.
     """
     path = abs_path(path)
+
+    if path == "/":
+        return True
+
     entry: Entry = stats(path)
 
     return entry.file_type == "directory"
@@ -434,17 +444,35 @@ def norm_path(path: str) -> str:
 # TODO: Implement
 
 
-def list_dir(absolute_path: str) -> list[Entry]:
+def list_dir(path: str) -> list[Entry]:
     """
     Returns all entries within a directory.
     """
+    path = abs_path(path)
+
+    if not path_exists(path):
+        _throw_FileNotFoundErr(path)
+    if not is_dir(path):
+        _throw_NotADirectoryErr(path)
 
     conn: sqlite3.Connection = sqlite3.connect(_db_path)
     cursor: sqlite3.Cursor = conn.cursor()
     entries: list[Entry] = []
 
     try:
-        pass
+        entry_id: int = _find_id(path)
+        print(entry_id)
+        query: str = (
+            Query.from_(_table_name)
+            .select("*")
+            .where(Field("pid") == entry_id)
+            .get_sql()
+        )
+        cursor.execute(query)
+
+        for record in cursor:
+            entries.append(Entry(record))
+        return entries
     except sqlite3.Error as e:
         print(f"Error: {e}")
     finally:
@@ -456,21 +484,21 @@ def list_dir(absolute_path: str) -> list[Entry]:
 # TODO: Implement
 
 
-def chmod(absolute_path: str, mode: int) -> None:
+def chmod(path: str, mode: int) -> None:
     pass
 
 
 # TODO: Implement
 
 
-def copy_file(absolute_src: str, absolute_dest: str) -> None:
+def copy_file(src: str, dest: str) -> None:
     pass
 
 
 # TODO: Implement
 
 
-def move(absolute_src: str, absolute_dest: str) -> None:
+def move(src: str, dest: str) -> None:
     pass
 
 
@@ -483,8 +511,7 @@ def make_dir(absolute_path: str) -> None:
 
 def remove(path: str) -> None:
     """
-    Removes an entry, if it exists. Returns True if removed,
-    false otherwise.
+    Removes an file.
     """
     path: str = abs_path(path)
 
@@ -510,12 +537,36 @@ def remove(path: str) -> None:
         conn.close()
 
 
-# TODO: Implement
+#TODO: Implement
 
 
 def remove_tree(path: str) -> None:
-    path = abs_path(path)
-    pass
+    """
+    Recursively deletes everything in a directory, then deletes the directory.
+    """
+    path: str = abs_path(path)
+
+    if not path_exists(path):
+        _throw_FileNotFoundErr(path)
+    elif not is_dir(path):
+        _throw_NotADirectoryErr(path)
+
+    conn: sqlite3.Connection = sqlite3.connect(_db_path)
+    cursor: sqlite3.Cursor = conn.cursor()
+
+    try:
+        entry_id: int = _find_id(path)
+
+        # query: str = (
+        #     Query.from_(_table_name).delete().where(Field("id") == entry_id).get_sql()
+        # )
+
+        # cursor.execute(query)
+        # conn.commit()
+    except sqlite3.Error as e:
+        print(f"Error: {e}")
+    finally:
+        conn.close()
 
 
 def is_abs_path(path: str) -> bool:
@@ -532,6 +583,11 @@ def abs_path(path: str) -> bool:
 
 # Example usage:
 if __name__ == "__main__":
+    try:
+        from rich import print
+    except ImportError:
+        pass
+
     csv_to_table("fakeFileData.csv")
-    set_cwd("home/angel")
-    remove("Fortnite.exe")
+    print(list_dir("."))
+    print(path_exists("."))
