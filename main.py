@@ -30,14 +30,12 @@ if __name__ == "__main__":
     fileSystem.set_table_name(TABLE_NAME)
     fileSystem.csv_to_table(CSV_FILE)
 
-    cont: str = "y"
-
-    while cont != "n":
-        cmdStr = input("Command: ")
+    while True: # Exits when `exit` is entered
+        cmdStr = input(prompt())
 
         # Singular, "simple" command is parsed
         shellCmd: ShellCommand = parseCommand(cmdStr).pop()
-
+    
         if callable(getattr(cmd_pkg, shellCmd.name, None)):
             commandFunc = getattr(cmd_pkg, shellCmd.name)
             result = commandFunc(
@@ -47,4 +45,3 @@ if __name__ == "__main__":
                 stdout=shellCmd.stdout,
             )
             print(result)
-        cont = input("Continue? [y/n]: ")

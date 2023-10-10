@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import os
+from . import fileSystem
 from .TockenizeFlags import tockenizeFlags
 from .InvalidFlagsMsg import invalidFlagsMsg
 
@@ -27,7 +27,7 @@ def cd(**kwargs)-> str:
 
     # If no param, default to user directory
     if not params:
-        params.append("~")
+        params.append("/")
 
     # Check if invalid flags are present
     if not flags.issubset(cd_flags):
@@ -43,24 +43,19 @@ def cd(**kwargs)-> str:
         # 1 argument
         else:
             param:str = params[0]
-
-            # Replace tilde with user directory
-            if param.startswith("~"):
-                param = param.replace("~", os.path.expanduser("~"), 1)
             
-            # Check if valid directory
-            if os.path.isdir(param):
-                os.chdir(param)
-            else:
+            try:
+                fileSystem.set_cwd(param)
+            except (FileNotFoundError, NotADirectoryError) as e:
                 result = f"{cd.__name__}: '{param}': No such directory"
 
     return result
 
 if __name__ == "__main__":
-    print(os.getcwd())
+    print(fileSystem.get_cwd())
 
     s:str = cd(params=["~/projects"])
 
     print(s)
 
-    print(os.getcwd())
+    print(fileSystem.get_cwd())
