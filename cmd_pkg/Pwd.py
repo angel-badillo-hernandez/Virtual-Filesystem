@@ -1,6 +1,6 @@
-from .fileSystem import FileSystem
-from .TockenizeFlags import tockenizeFlags
-from .InvalidFlagsMsg import invalidFlagsMsg
+import fileSystem
+from TockenizeFlags import tockenizeFlags
+from InvalidFlagsMsg import invalidFlagsMsg
 
 pwd_flags:set[str] = {
     "--help"
@@ -30,10 +30,10 @@ def pwd(**kwargs)-> str:
         result = pwd.__doc__
     # If other valid flags or none
     else:
-        result = FileSystem.get_cwd()
+        result = fileSystem.get_cwd()
     
     return result
 
 if __name__ == "__main__":
-    FileSystem.set_cwd("/home/angel/")
+    fileSystem.set_cwd("/home/angel/")
     print(pwd())
