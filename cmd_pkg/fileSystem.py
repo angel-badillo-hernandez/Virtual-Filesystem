@@ -193,7 +193,7 @@ def create_table(
     Args:
         table_name (str): Name of the table.
     """
-
+    table_name = table_name if table_name else _table_name
     conn: sqlite3.Connection = sqlite3.connect(_db_path)
     cursor: sqlite3.Cursor = conn.cursor()
 
@@ -249,8 +249,8 @@ def csv_to_table(file_name: str, table_name: str | None = None) -> None:
 
     table_name = table_name if table_name else _table_name
 
-    drop_table()
-    create_table()
+    drop_table(table_name)
+    create_table(table_name)
 
     with open(file_name) as file:
         data = csv.reader(file)
