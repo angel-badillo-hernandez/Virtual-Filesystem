@@ -186,18 +186,13 @@ def set_cwd(path: str) -> None:
 
 def create_table(
     table_name: str | None = None,
-    columns_info: list[tuple[str, str]] | None = None,
 ) -> bool:
     """
     Create a new table with specified columns, if it does not already exist.
 
     Args:
         table_name (str): Name of the table.
-        columns (list): List of column definitions.
     """
-
-    table_name = table_name if table_name else _table_name
-    columns_info = columns_info if columns_info else _columns_info
 
     conn: sqlite3.Connection = sqlite3.connect(_db_path)
     cursor: sqlite3.Cursor = conn.cursor()
@@ -206,7 +201,7 @@ def create_table(
         # Create a table with the given columns, if not already existing
         query: str = (
             Query.create_table(table_name)
-            .columns(*columns_info)
+            .columns(*_columns_info)
             .if_not_exists()
             .get_sql()
         )
