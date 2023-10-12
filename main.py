@@ -39,7 +39,7 @@ if __name__ == "__main__":
         if not temp:
             continue
 
-        shellCmd:shellCmd = temp[0]
+        shellCmd:ShellCommand = temp[0]
     
         if callable(getattr(cmd_pkg, shellCmd.name, None)):
             commandFunc = getattr(cmd_pkg, shellCmd.name)
