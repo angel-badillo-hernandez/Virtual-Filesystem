@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import os, shutil
+from . import fileSystem
 from .TockenizeFlags import tockenizeFlags
 from .InvalidFlagsMsg import invalidFlagsMsg
 
@@ -33,7 +33,7 @@ def cp(**kwargs)-> str:
     else:
         if len(params) == 2:
             try:
-                shutil.copyfile(params[0], params[1])
+                fileSystem.copy_file(params[0], params[1])
             except(FileNotFoundError, IsADirectoryError) as error:
                 result = f"{cp.__name__}: cannot copy '{error.filename}': {error.strerror}"
         else:
@@ -42,5 +42,5 @@ def cp(**kwargs)-> str:
     return result
 
 if __name__ == "__main__":
-    s= cp(params=["~", "~/Fort/w2.txt"], flags=[])
+    s= cp(params=["/home/angel/Fortnite.exe", "/fort.exe"], flags=[])
     print(s)

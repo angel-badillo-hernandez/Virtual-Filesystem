@@ -34,7 +34,12 @@ if __name__ == "__main__":
         cmdStr = input(prompt())
 
         # Singular, "simple" command is parsed
-        shellCmd: ShellCommand = parseCommand(cmdStr).pop()
+        temp = parseCommand(cmdStr)
+
+        if not temp:
+            continue
+
+        shellCmd:shellCmd = temp[0]
     
         if callable(getattr(cmd_pkg, shellCmd.name, None)):
             commandFunc = getattr(cmd_pkg, shellCmd.name)
