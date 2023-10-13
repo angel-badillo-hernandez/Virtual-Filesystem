@@ -1,4 +1,5 @@
-import os, shutil
+import os
+from . import fileSystem
 from .TockenizeFlags import tockenizeFlags
 from .InvalidFlagsMsg import invalidFlagsMsg
 
@@ -31,18 +32,14 @@ def mv(**kwargs)-> str:
     # If other valid flags or none
     else:
         if len(params) == 2:
-            for i in range(0, len(params)):
-                # Replace tilde with user directory
-                if params[i].startswith("~"):
-                    params[i] = params[i].replace("~", os.path.expanduser("~"), 1)
             try:
-                shutil.move(params[0], params[1])
-            # If file not found
-            except(FileNotFoundError) as error:
+                fileSystem.move(params[0], params[1])
+            # If file not found or already exist
+            except(FileNotFoundError, FileExistsError) as error:
                 result = f"{mv.__name__}: cannot move '{error.filename}': {error.strerror}"
-            # If other miscellaneous error, e.g moving directory into itself, destination already exists, etc.
-            except(shutil.Error) as error:
-                result = f"{mv.__name__}: {error}"
+            # If src and dest are the same
+            except(OSError) as error:
+                result = f"{mv.__name__}: '{error.filename}' is '{error.filename2}'"
         else:
             result = f"{mv.__name__}: missing file operand(s)"
             

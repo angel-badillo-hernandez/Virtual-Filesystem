@@ -78,6 +78,13 @@ class Entry:
         return str(self)
 
 
+def _throw_OSError(path: str, path2: str = None):
+    """
+    Raises OSError with given path(s).
+    """
+    raise OSError(errno.EINVAL, os.strerror(errno.EINVAL), path, None, path2)
+
+
 def _throw_FileNotFoundError(path: str):
     """
     Raises FileNotFoundError with given path.
@@ -328,9 +335,6 @@ def _next_id() -> int:
         conn.close()
 
 
-# NOTE: This is does not validate data, it must be in the correct format.
-
-
 def _insert_entry(record: tuple | Entry) -> None:
     """
     Insert an entry into the table of the fileSystem database.
@@ -359,6 +363,10 @@ def path_exists(path: str) -> bool:
     Returns true if path exists. Must be a full path beginning with "/"
     """
     path = abs_path(path)
+
+    if path == "/":
+        return True
+
     parts: list[str] = path_split(path)
     conn: sqlite3.Connection = sqlite3.connect(_db_path)
     cursor: sqlite3.Cursor = conn.cursor()
@@ -425,16 +433,23 @@ def stats(path: str) -> Entry:
         conn.close()
 
 
-def newd(path:str) -> bool:
+def is_dir(path: str) -> bool:
     """
-    Returns true if path exists. Must be a full path beginning with "/"
+    Checks if path is a directory.
+    Returns True if exists and file_type is a directory.
+    Returns False if does not exist or file_type is file.
     """
     path = abs_path(path)
+
+    if path == "/":
+        return True
+
     parts: list[str] = path_split(path)
     conn: sqlite3.Connection = sqlite3.connect(_db_path)
     cursor: sqlite3.Cursor = conn.cursor()
     curr_id: int = 0
-    file_type:str = None
+    file_type: str = None
+
     try:
         if not parts or parts[0] != "/":
             return False
@@ -448,9 +463,14 @@ def newd(path:str) -> bool:
                 .get_sql()
             )
             cursor.execute(query)
-            curr_id,file_type = cursor.fetchone()
-            if not curr_id:
+            row: tuple = cursor.fetchone()
+
+            if not row:
                 return False
+            else:
+                curr_id, file_type = row
+
+        return True if file_type == "directory" else False
 
     except sqlite3.Error as e:
         print(f"Error: {e}")
@@ -459,32 +479,15 @@ def newd(path:str) -> bool:
 
     return True
 
-def is_dir(path: str) -> bool:
-    """
-    Checks if path is a directory.
-    Returns True if exists and file_type is a directory.
-    Returns False if does not exist or file_type is file.
-    """
-    path = abs_path(path)
-
-    if path == "/":
-        return True
-
-    entry: Entry = stats(path)
-
-    return entry.file_type == "directory"
-
 
 def is_file(path: str) -> bool:
     """
-    Checks if path is a directory.
+    Checks if path is a file.
     Returns True if exists and file_type is a file
     Returns False if does not exist or file_type is directory.
     """
     path = abs_path(path)
-    entry: Entry = stats(path)
-
-    return entry.file_type == "file"
+    return not is_dir(path) and path_exists(path)
 
 
 def norm_path(path: str) -> str:
@@ -567,24 +570,49 @@ def chmod(path: str, mode: int) -> None:
 
 
 def copy_file(src: str, dest: str) -> None:
-    """ """
+    """
+    Stuff
+    """
     src = abs_path(src)
     dest = abs_path(dest)
 
-    if not path_exists(src):
+    # If same path, just raise OSError
+    if src == dest:
+        _throw_OSError(src, dest)
+    elif not path_exists(src):
         _throw_FileNotFoundError(src)
     elif not is_file(src):
         _throw_IsADirectoryError(src)
 
-    parent, new_file_name = os.path.split(dest)
+    # If dest is not directory, check if head of path os a directory
+    if not is_dir(dest):
+        parent, new_file_name = os.path.split(dest)
 
-    if not path_exists(parent):
-        _throw_FileNotFoundError(parent)
-    elif not is_dir(parent):
-        _throw_NotADirectoryError(parent)
+        # If head of path is not a directory or does not exist, raise FileNotFoundError
+        if not path_exists(parent):
+            _throw_FileNotFoundError(parent)
+        elif not is_dir(parent):
+            _throw_NotADirectoryError(parent)
 
-    if not new_file_name:
+        new_path:str = os.path.join(parent, new_file_name)
+        # If path exists in target directory, raise FileExistsError
+        if path_exists(new_path):
+            _throw_FileExistsError(new_path)
+
+        
+    # If dest is a directory, use same name as filename from src
+    else:
+        parent = dest
         temp, new_file_name = os.path.split(src)
+        
+        # If same path, just raise OSError
+        if src == os.path.join(dest, new_file_name):
+            _throw_OSError(src, src)
+
+        # File already exists in target directory, raise FileExistsError
+        new_path:str = os.path.join(dest, new_file_name)
+        if path_exists(new_path):
+            _throw_FileExistsError(new_path)
 
     pid: int = _find_id(parent)
     new_file: Entry = stats(src)
@@ -602,11 +630,60 @@ def copy_file(src: str, dest: str) -> None:
 
 
 def move(src: str, dest: str) -> None:
-    pass
+    """
+    Stuff
+    """
+    src = abs_path(src)
+    dest = abs_path(dest)
 
+    # If same path, just raise OSError
+    if src == dest:
+        _throw_OSError(src, dest)
+    elif not path_exists(src):
+        _throw_FileNotFoundError(src)
+    elif not is_file(src):
+        _throw_IsADirectoryError(src)
 
-# TODO: Implement
+    # If dest is not directory, check if head of path os a directory
+    if not is_dir(dest):
+        parent, new_file_name = os.path.split(dest)
 
+        # If head of path is not a directory or does not exist, raise FileNotFoundError
+        if not path_exists(parent):
+            _throw_FileNotFoundError(parent)
+        elif not is_dir(parent):
+            _throw_NotADirectoryError(parent)
+
+        new_path:str = os.path.join(parent, new_file_name)
+        # If file exists in target directory, raise FileExistsError
+        if is_file(new_path):
+            _throw_FileExistsError(new_path)
+
+        
+    # If dest is a directory, use same name as filename from src
+    else:
+        parent = dest
+        temp, new_file_name = os.path.split(src)
+        
+        # If same path, just raise OSError
+        if src == os.path.join(dest, new_file_name):
+            _throw_OSError(src, src)
+
+        # File already exists in target directory, raise FileExistsError
+        new_path:str = os.path.join(dest, new_file_name)
+        if is_file(os.path.join(dest, new_file_name)):
+            _throw_FileExistsError(os.path.join(dest, new_file_name))
+
+    pid: int = _find_id(parent)
+    new_file: Entry = stats(src)
+    new_file.file_name = new_file_name
+    new_file.pid = pid
+    new_file.id = _next_id()
+    new_file.modification_time = datetime.datetime.fromtimestamp(
+        datetime.datetime.now().timestamp()
+    ).isoformat(sep=" ", timespec="seconds")
+
+    _insert_entry(new_file)
 
 def make_dir(path: str) -> None:
     """
@@ -655,6 +732,40 @@ def remove(path: str) -> None:
     cursor: sqlite3.Cursor = conn.cursor()
 
     try:
+        entry_id: int = _find_id(path)
+
+        query: str = (
+            Query.from_(_table_name).delete().where(Field("id") == entry_id).get_sql()
+        )
+        cursor.execute(query)
+        conn.commit()
+    except sqlite3.Error as e:
+        print(f"Error: {e}")
+    finally:
+        conn.close()
+
+
+def remove_dir(path: str) -> None:
+    """
+    Removes an empty directory.
+    """
+    path: str = abs_path(path)
+
+    if not path_exists(path):
+        _throw_FileNotFoundError(path)
+    elif not is_dir(path):
+        _throw_IsADirectoryError(path)
+
+    conn: sqlite3.Connection = sqlite3.connect(_db_path)
+    cursor: sqlite3.Cursor = conn.cursor()
+
+    try:
+        dir_entries: list[Entry] = list_dir(path)
+
+        # If not empty, cannot delete directory
+        if dir_entries:
+            _throw_OSError(path)
+
         entry_id: int = _find_id(path)
 
         query: str = (
@@ -742,6 +853,9 @@ def is_relative_path(path: str) -> bool:
 
 
 def abs_path(path: str) -> bool:
+    """
+    Converts relative path to absolute path
+    """
     return norm_path(os.path.join(_cwd, path))
 
 
@@ -753,12 +867,5 @@ if __name__ == "__main__":
         pass
 
     csv_to_table("fakeFileData.csv")
-    chmod("/home/angel", 0o777)
-    print(stats("/home/angel"))
-    chmod("home/angel/Fortnite.exe", 0o777)
-    print(stats("home/angel/Fortnite.exe"))
-    set_cwd("home/angel")
-    print(abs_path("/"))
-    print(list_dir("/"))
-    set_cwd("/home")
-    print(get_cwd())
+    set_cwd("/home/angel/")
+    move("/home/angel/Fortnite.exe", "./Fortnite.exe")

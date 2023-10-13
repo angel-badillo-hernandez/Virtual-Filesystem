@@ -32,10 +32,12 @@ def cp(**kwargs) -> str:
         if len(params) == 2:
             try:
                 fileSystem.copy_file(params[0], params[1])
-            except (FileNotFoundError, IsADirectoryError) as error:
+            except (FileNotFoundError, IsADirectoryError, FileExistsError) as error:
                 result = (
                     f"{cp.__name__}: cannot copy '{error.filename}': {error.strerror}"
                 )
+            except OSError as error:
+                result = f"{cp.__name__}: '{error.filename}' and '{error.filename2}' are the same file"
         else:
             result = f"{cp.__name__}: missing file operand(s)"
 
@@ -43,5 +45,5 @@ def cp(**kwargs) -> str:
 
 
 if __name__ == "__main__":
-    s = cp(params=["/home/angel/Fortnite.exe", "/fort.exe"], flags=[])
+    s = cp(params=["/home/angel/F", "."], flags=[])
     print(s)

@@ -1,4 +1,3 @@
-from .Cat import cat
 from .Cd import cd
 from .Exit import exit
 from .Clear import clear
