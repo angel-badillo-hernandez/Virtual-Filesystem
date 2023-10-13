@@ -625,9 +625,6 @@ def copy_file(src: str, dest: str) -> None:
     _insert_entry(new_file)
 
 
-# TODO: Implement
-
-
 def move(src: str, dest: str) -> None:
     """
     Stuff
@@ -689,17 +686,30 @@ def move(src: str, dest: str) -> None:
             entry.modification_time = datetime.datetime.fromtimestamp(
                 datetime.datetime.now().timestamp()
             ).isoformat(sep=" ", timespec="seconds")
-        
-        conn:sqlite3.Connection = sqlite3.connect(_db_path)
-        cursor:sqlite3.Cursor = conn.cursor()
+
+        conn: sqlite3.Connection = sqlite3.connect(_db_path)
+        cursor: sqlite3.Cursor = conn.cursor()
 
         try:
             for entry in dir_entries:
-                query:str = Query.update(_table_name).set(Field("pid"), new_file.id).set(Field("modification_time"), entry.modification_time).where(Field("id") == entry.id).get_sql()
+                query: str = (
+                    Query.update(_table_name)
+                    .set(Field("pid"), new_file.id)
+                    .set(Field("modification_time"), entry.modification_time)
+                    .where(Field("id") == entry.id)
+                    .get_sql()
+                )
                 cursor.execute(query)
                 conn.commit()
-            
-            query:str = Query.update(_table_name).set(Field("pid"), pid).set(Field("file_name"), new_file.file_name).set(Field("modification_time"), new_file.modification_time).where(Field("id") == new_file.id).get_sql()
+
+            query: str = (
+                Query.update(_table_name)
+                .set(Field("pid"), pid)
+                .set(Field("file_name"), new_file.file_name)
+                .set(Field("modification_time"), new_file.modification_time)
+                .where(Field("id") == new_file.id)
+                .get_sql()
+            )
             cursor.execute(query)
             conn.commit()
         except sqlite3.Error as e:
@@ -707,7 +717,7 @@ def move(src: str, dest: str) -> None:
         finally:
             conn.close()
 
-        
+
 def make_dir(path: str) -> None:
     """
     Create directory if does not exist.
@@ -882,7 +892,58 @@ def abs_path(path: str) -> bool:
     return norm_path(os.path.join(_cwd, path))
 
 
-# Example usage:
+def touch(path: str) -> bool:
+    path = abs_path(path)
+
+    conn: sqlite3.Connection = sqlite3.connect(_db_path)
+    cursor: sqlite3.Cursor = conn.cursor()
+    try:
+        if path_exists(path):
+            entry_id: int = _find_id(path)
+            curr_time: str = datetime.datetime.fromtimestamp(
+                datetime.datetime.now().timestamp()
+            ).isoformat(sep=" ", timespec="seconds")
+
+            query: str = (
+                Query.update(_table_name)
+                .set(Field("modification_time"), curr_time)
+                .where(Field("id") == entry_id)
+                .get_sql()
+            )
+
+            cursor.execute(query)
+            conn.commit()
+        else:
+            parent, new_file_name = os.path.split(path)
+
+            if not path_exists(parent):
+                _throw_FileNotFoundError(path)
+            elif not is_dir(parent):
+                _throw_NotADirectoryError(path)
+
+            pid: int = _find_id(parent)
+            entry: Entry = Entry()
+            entry.pid = pid
+            entry.id = _next_id()
+            entry.file_name = new_file_name
+            entry.file_type = "file"
+            entry.file_size = 0
+            entry.owner_name = "user"
+            entry.group_name = "user"
+            entry.modification_time = datetime.datetime.fromtimestamp(
+                datetime.datetime.now().timestamp()
+            ).isoformat(sep=" ", timespec="seconds")
+            entry.permissions = stat.filemode(0o100777)
+            entry.content = ""
+
+            _insert_entry(entry)
+
+    except sqlite3.Error as e:
+        print(f"Error: {e}")
+    finally:
+        conn.close()
+
+
 if __name__ == "__main__":
     csv_to_table("fakeFileData.csv")
     move("/home", "./sys/")

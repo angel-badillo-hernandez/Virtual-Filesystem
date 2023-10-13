@@ -1,4 +1,5 @@
-import os, sys
+import sys
+from . import fileSystem
 from .TockenizeFlags import tockenizeFlags
 from .InvalidFlagsMsg import invalidFlagsMsg
 
@@ -34,26 +35,10 @@ def touch(**kwargs)-> str:
         # If other valid flags or none
     else:
         for param in params:
-            # Replace tilde with user directory
-            if param.startswith("~"):
-                param = param.replace("~", os.path.expanduser("~"), 1)
-            
-            else:
-                for param in params:
-                    # Replace tilde with user directory
-                    if param.startswith("~"):
-                        param = param.replace("~", os.path.expanduser("~"), 1)
-                    
-                try:
-                    if not os.path.exists(param):
-                        open(param, 'a').close()
-                    os.utime(param, None)
-                except(FileExistsError):
-                    result = f"{touch.__name__}: cannot create directory '{param}': File exists"
-                except(FileNotFoundError):
-                    result = f"{touch.__name__}: cannot create directory '{param}': No such file or directory"
-                except(PermissionError):
-                    result = f"{touch.__name__}: cannot create directory '{param}': Permission denied"
+            try:
+                fileSystem.touch(param)
+            except(FileNotFoundError, NotADirectoryError):
+                result = f"{touch.__name__}: cannot touch '{param}': No such file or directory"
 
     return result
 
