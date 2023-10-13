@@ -84,10 +84,6 @@ def chmod(**kwargs) -> str:
             message = "".join(
                 "Invalid permissions format. Please provide octal permissions like '777' or '644'"
             )
-        except PermissionError:
-            message = "".join(
-                "Permission denied. You do not have permission to change the permissions of '{params}'."
-            )
         return message
     return result
 
