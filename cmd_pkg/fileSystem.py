@@ -594,23 +594,22 @@ def copy_file(src: str, dest: str) -> None:
         elif not is_dir(parent):
             _throw_NotADirectoryError(parent)
 
-        new_path:str = os.path.join(parent, new_file_name)
+        new_path: str = os.path.join(parent, new_file_name)
         # If path exists in target directory, raise FileExistsError
         if path_exists(new_path):
             _throw_FileExistsError(new_path)
 
-        
     # If dest is a directory, use same name as filename from src
     else:
         parent = dest
         temp, new_file_name = os.path.split(src)
-        
+
         # If same path, just raise OSError
         if src == os.path.join(dest, new_file_name):
             _throw_OSError(src, src)
 
         # File already exists in target directory, raise FileExistsError
-        new_path:str = os.path.join(dest, new_file_name)
+        new_path: str = os.path.join(dest, new_file_name)
         if path_exists(new_path):
             _throw_FileExistsError(new_path)
 
@@ -641,8 +640,6 @@ def move(src: str, dest: str) -> None:
         _throw_OSError(src, dest)
     elif not path_exists(src):
         _throw_FileNotFoundError(src)
-    elif not is_file(src):
-        _throw_IsADirectoryError(src)
 
     # If dest is not directory, check if head of path os a directory
     if not is_dir(dest):
@@ -654,37 +651,63 @@ def move(src: str, dest: str) -> None:
         elif not is_dir(parent):
             _throw_NotADirectoryError(parent)
 
-        new_path:str = os.path.join(parent, new_file_name)
-        # If file exists in target directory, raise FileExistsError
-        if is_file(new_path):
+        new_path: str = os.path.join(parent, new_file_name)
+        # If path exists in target directory, raise FileExistsError
+        if path_exists(new_path):
             _throw_FileExistsError(new_path)
 
-        
     # If dest is a directory, use same name as filename from src
     else:
         parent = dest
         temp, new_file_name = os.path.split(src)
-        
+
         # If same path, just raise OSError
         if src == os.path.join(dest, new_file_name):
             _throw_OSError(src, src)
 
         # File already exists in target directory, raise FileExistsError
-        new_path:str = os.path.join(dest, new_file_name)
-        if is_file(os.path.join(dest, new_file_name)):
-            _throw_FileExistsError(os.path.join(dest, new_file_name))
+        new_path: str = os.path.join(dest, new_file_name)
+        if path_exists(new_path):
+            _throw_FileExistsError(new_path)
 
     pid: int = _find_id(parent)
     new_file: Entry = stats(src)
     new_file.file_name = new_file_name
     new_file.pid = pid
-    new_file.id = _next_id()
     new_file.modification_time = datetime.datetime.fromtimestamp(
         datetime.datetime.now().timestamp()
     ).isoformat(sep=" ", timespec="seconds")
 
-    _insert_entry(new_file)
+    if is_file(src):
+        remove(src)
+        _insert_entry(new_file)
+    else:
+        dir_entries: list[Entry] = list_dir(src)
 
+        for entry in dir_entries:
+            entry.pid = new_file.id
+            entry.modification_time = datetime.datetime.fromtimestamp(
+                datetime.datetime.now().timestamp()
+            ).isoformat(sep=" ", timespec="seconds")
+        
+        conn:sqlite3.Connection = sqlite3.connect(_db_path)
+        cursor:sqlite3.Cursor = conn.cursor()
+
+        try:
+            for entry in dir_entries:
+                query:str = Query.update(_table_name).set(Field("pid"), new_file.id).set(Field("modification_time"), entry.modification_time).where(Field("id") == entry.id).get_sql()
+                cursor.execute(query)
+                conn.commit()
+            
+            query:str = Query.update(_table_name).set(Field("pid"), pid).set(Field("file_name"), new_file.file_name).set(Field("modification_time"), new_file.modification_time).where(Field("id") == new_file.id).get_sql()
+            cursor.execute(query)
+            conn.commit()
+        except sqlite3.Error as e:
+            print(f"Error: {e}")
+        finally:
+            conn.close()
+
+        
 def make_dir(path: str) -> None:
     """
     Create directory if does not exist.
@@ -861,11 +884,5 @@ def abs_path(path: str) -> bool:
 
 # Example usage:
 if __name__ == "__main__":
-    try:
-        from rich import print
-    except ImportError:
-        pass
-
     csv_to_table("fakeFileData.csv")
-    set_cwd("/home/angel/")
-    move("/home/angel/Fortnite.exe", "./Fortnite.exe")
+    move("/home", "./sys/")

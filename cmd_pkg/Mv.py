@@ -45,5 +45,5 @@ def mv(**kwargs)-> str:
     return result
 
 if __name__ == "__main__":
-    s= mv(params=["wo.txt", "stuff.txt"], flags=[])
+    s= mv(params=["/home", "/fortnite"], flags=[])
     print(s)
