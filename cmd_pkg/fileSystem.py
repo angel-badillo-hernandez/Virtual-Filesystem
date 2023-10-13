@@ -473,7 +473,6 @@ def list_dir(path: str) -> list[Entry]:
 
     try:
         entry_id: int = _find_id(path)
-        print(entry_id)
         query: str = (
             Query.from_(_table_name)
             .select("*")
