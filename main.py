@@ -30,17 +30,25 @@ if __name__ == "__main__":
     fileSystem.set_table_name(TABLE_NAME)
     fileSystem.csv_to_table(CSV_FILE)
 
-    while True: # Exits when `exit` is entered
-        cmdStr = input(prompt())
+    while True:  # Exits when `exit` is entered
+        cmdStr = ""
+
+        try:
+            cmdStr = input(prompt())
+        # Exit if Ctrl-C is entered
+        except KeyboardInterrupt:
+            print("\n")
+            raise SystemExit()
 
         # Singular, "simple" command is parsed
         temp = parseCommand(cmdStr)
 
         if not temp:
+            # Empty string, just skip this iteration
             continue
 
-        shellCmd:ShellCommand = temp[0]
-    
+        shellCmd: ShellCommand = temp[0]
+
         if callable(getattr(cmd_pkg, shellCmd.name, None)):
             commandFunc = getattr(cmd_pkg, shellCmd.name)
             result = commandFunc(

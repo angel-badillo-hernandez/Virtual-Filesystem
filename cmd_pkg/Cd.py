@@ -2,27 +2,26 @@ from . import fileSystem
 from .TockenizeFlags import tockenizeFlags
 from .InvalidFlagsMsg import invalidFlagsMsg
 
-cd_flags:set[str] = {
-    "--help"
-}
+cd_flags: set[str] = {"--help"}
 
-def cd(**kwargs)-> str:
+
+def cd(**kwargs) -> str:
     """
     NAME
-        cd 
-        
+        cd
+
     DESCRIPTION
         cd           : changes the current directory to the specified directory
             --help   : displays how to use the cd command
-        
+
     EXAMPLE
         `cd <path>`  : moves into the specified directory path
         `cd ~`       : changes the current directory to the home directory
         `cd ..`      : moves the current directory back one directory
     """
-    params:list[str] = kwargs.get("params", [])
-    flags:set[str] = tockenizeFlags(kwargs.get("flags", []))
-    result:str = ""
+    params: list[str] = kwargs.get("params", [])
+    flags: set[str] = tockenizeFlags(kwargs.get("flags", []))
+    result: str = ""
 
     # If no param, default to user directory
     if not params:
@@ -41,8 +40,8 @@ def cd(**kwargs)-> str:
             result = f"{cd.__name__}: too many arguments"
         # 1 argument
         else:
-            param:str = params[0]
-            
+            param: str = params[0]
+
             try:
                 fileSystem.set_cwd(param)
             except FileNotFoundError as e:
@@ -52,10 +51,11 @@ def cd(**kwargs)-> str:
 
     return result
 
+
 if __name__ == "__main__":
     print(fileSystem.get_cwd())
 
-    s:str = cd(params=["~/projects"])
+    s: str = cd(params=["home"])
 
     print(s)
 

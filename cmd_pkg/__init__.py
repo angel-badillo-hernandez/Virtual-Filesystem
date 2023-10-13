@@ -6,16 +6,9 @@ from .Ls import ls
 from .Mkdir import mkdir
 from .Pwd import pwd
 from .Rmdir import rmdir
-from .Sort import sort
-from .Who import who
 from .Rm import rm
-from .Wc import wc
 from .Cp import cp
 from .Mv import mv
 from .Touch import touch
 from .Chmod import chmod
-from .Grep import grep
-from .Head import head
-from .Tail import tail
-from .Less import less
 from . import fileSystem

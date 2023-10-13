@@ -2,11 +2,13 @@ import sqlite3, os, csv, errno, stat
 from pypika import Table, Query, Field, Column, Order
 import datetime
 
-_db_path: str = "fileSystem.sqlite" # Global var for keeping track of path to database file
+_db_path: str = (
+    "filesystem.sqlite"  # Global var for keeping track of path to database file
+)
 
-_table_name: str = "FileSystem" # Global var for keeping track of path to table name
+_table_name: str = "FileSystem"  # Global var for keeping track of path to table name
 
-_columns_info: list[tuple[str, str]] = [ # Global var for keeping track of column names
+_columns_info: list[tuple[str, str]] = [  # Global var for keeping track of column names
     ("id", "INTEGER PRIMARY KEY"),
     ("pid", "INTEGER"),
     ("file_name", "TEXT"),
@@ -19,7 +21,8 @@ _columns_info: list[tuple[str, str]] = [ # Global var for keeping track of colum
     ("content", "BLOB"),
 ]
 
-_cwd: str = "/" # Global var for keeping track of current working directory
+_cwd: str = "/"  # Global var for keeping track of current working directory
+
 
 class Entry:
     def __init__(self, record: tuple | None = None) -> None:
@@ -95,8 +98,10 @@ def _throw_IsADirectoryError(path: str):
     """
     raise IsADirectoryError(errno.EISDIR, os.strerror(errno.EISDIR), path)
 
-def _throw_FileExistsError(path:str):
+
+def _throw_FileExistsError(path: str):
     raise FileExistsError(errno.EEXIST, os.strerror(errno.EEXIST), path)
+
 
 def path_split(path: str) -> list[str]:
     """
@@ -170,7 +175,7 @@ def get_cwd() -> str:
 def set_cwd(path: str) -> None:
     """
     Changes the current working directory. Must be full path starting with "/".
-    Raises FileNotFoundError if path does not exist. Raises NotADirectoryError 
+    Raises FileNotFoundError if path does not exist. Raises NotADirectoryError
     if path is not a directory.
     """
     path = abs_path(path)
@@ -491,6 +496,7 @@ def list_dir(path: str) -> list[Entry]:
 
     return entries
 
+
 def chmod(path: str, mode: int) -> None:
     """
     Changes the permissions on a file/directory given octal 3-digit number.
@@ -508,11 +514,16 @@ def chmod(path: str, mode: int) -> None:
     else:
         mode += 0o100000
 
-    modeStr:str = stat.filemode(mode)    
+    modeStr: str = stat.filemode(mode)
 
     try:
-        entry_id:int = _find_id(path)
-        query:str = Query.update(_table_name).set(Field("permissions"), modeStr).where(Field("id") == entry_id).get_sql()
+        entry_id: int = _find_id(path)
+        query: str = (
+            Query.update(_table_name)
+            .set(Field("permissions"), modeStr)
+            .where(Field("id") == entry_id)
+            .get_sql()
+        )
         cursor.execute(query)
         conn.commit()
     except sqlite3.Error as e:
@@ -520,12 +531,12 @@ def chmod(path: str, mode: int) -> None:
     finally:
         conn.close()
 
+
 def copy_file(src: str, dest: str) -> None:
-    """
-    """
+    """ """
     src = abs_path(src)
     dest = abs_path(dest)
-    
+
     if not path_exists(src):
         _throw_FileNotFoundError(src)
     elif not is_file(src):
@@ -537,18 +548,21 @@ def copy_file(src: str, dest: str) -> None:
         _throw_FileNotFoundError(parent)
     elif not is_dir(parent):
         _throw_NotADirectoryError(parent)
-    
+
     if not new_file_name:
         temp, new_file_name = os.path.split(src)
-    
-    pid:int = _find_id(parent)
-    new_file:Entry = stats(src)
+
+    pid: int = _find_id(parent)
+    new_file: Entry = stats(src)
     new_file.file_name = new_file_name
     new_file.pid = pid
     new_file.id = _next_id()
-    new_file.modification_time = datetime.datetime.fromtimestamp(datetime.datetime.now().timestamp()).isoformat(sep=" ", timespec="seconds")
+    new_file.modification_time = datetime.datetime.fromtimestamp(
+        datetime.datetime.now().timestamp()
+    ).isoformat(sep=" ", timespec="seconds")
 
     _insert_entry(new_file)
+
 
 # TODO: Implement
 
@@ -565,7 +579,7 @@ def make_dir(path: str) -> None:
     Create directory if does not exist.
     """
     path = abs_path(path)
-    
+
     if path_exists(path):
         _throw_FileExistsError(path)
 
@@ -574,14 +588,16 @@ def make_dir(path: str) -> None:
     if not path_exists(parent):
         _throw_FileNotFoundError(parent)
 
-    pid:int = _find_id(parent)
-    new_dir:Entry = Entry()
+    pid: int = _find_id(parent)
+    new_dir: Entry = Entry()
     new_dir.id = _next_id()
     new_dir.pid = pid
     new_dir.file_name = dest
     new_dir.file_type = "directory"
     new_dir.file_size = 0
-    new_dir.modification_time = datetime.datetime.fromtimestamp(datetime.datetime.now().timestamp()).isoformat(sep=" ", timespec="seconds")
+    new_dir.modification_time = datetime.datetime.fromtimestamp(
+        datetime.datetime.now().timestamp()
+    ).isoformat(sep=" ", timespec="seconds")
     new_dir.permissions = stat.filemode(0o40777)
     new_dir.owner_name = "user"
     new_dir.group_name = "user"
@@ -636,7 +652,7 @@ def remove_tree(path: str) -> None:
         # Find id of top directory in tree
         rootEntry_id: int = _find_id(path)
 
-        # Query to retrieve id,pid for all entries that have their pid 
+        # Query to retrieve id,pid for all entries that have their pid
         # set to rootEntry_id.
         query: str = (
             Query.from_(_table_name)
@@ -702,15 +718,13 @@ if __name__ == "__main__":
     except ImportError:
         pass
 
-    # drop_table()
     csv_to_table("fakeFileData.csv")
-    # chmod("/home/angel", 0o777)
-    # print(stats("/home/angel"))
-    # chmod("home/angel/Fortnite.exe", 0o777)
-    # print(stats("home/angel/Fortnite.exe"))
-    # set_cwd("home/angel")
-    # print(abs_path("/"))
-    # print(list_dir("/"))
+    chmod("/home/angel", 0o777)
+    print(stats("/home/angel"))
+    chmod("home/angel/Fortnite.exe", 0o777)
+    print(stats("home/angel/Fortnite.exe"))
+    set_cwd("home/angel")
+    print(abs_path("/"))
+    print(list_dir("/"))
     set_cwd("/home")
     print(get_cwd())
-    make_dir("/oof/angel/Fortnite")
