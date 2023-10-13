@@ -425,6 +425,40 @@ def stats(path: str) -> Entry:
         conn.close()
 
 
+def newd(path:str) -> bool:
+    """
+    Returns true if path exists. Must be a full path beginning with "/"
+    """
+    path = abs_path(path)
+    parts: list[str] = path_split(path)
+    conn: sqlite3.Connection = sqlite3.connect(_db_path)
+    cursor: sqlite3.Cursor = conn.cursor()
+    curr_id: int = 0
+    file_type:str = None
+    try:
+        if not parts or parts[0] != "/":
+            return False
+
+        for i in range(1, len(parts)):
+            query: str = (
+                Query.from_(_table_name)
+                .select("id", "file_type")
+                .where(Field("pid") == curr_id)
+                .where(Field("file_name") == parts[i])
+                .get_sql()
+            )
+            cursor.execute(query)
+            curr_id,file_type = cursor.fetchone()
+            if not curr_id:
+                return False
+
+    except sqlite3.Error as e:
+        print(f"Error: {e}")
+    finally:
+        conn.close()
+
+    return True
+
 def is_dir(path: str) -> bool:
     """
     Checks if path is a directory.
