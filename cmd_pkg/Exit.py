@@ -33,7 +33,7 @@ def exit(**kwargs) -> str:
             result = f"{exit.__name__}: too many arguments"
         # Terminate shell
         else:
-            raise (SystemExit)
+            raise SystemExit()
 
     # Returns empty string if normal usage.
     return result
