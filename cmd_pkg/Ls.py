@@ -1,7 +1,7 @@
 import os, stat, datetime, pwd, grp
-import fileSystem
-from TockenizeFlags import tockenizeFlags
-from InvalidFlagsMsg import invalidFlagsMsg
+from . import fileSystem
+from .TockenizeFlags import tockenizeFlags
+from .InvalidFlagsMsg import invalidFlagsMsg
 
 RESET = "\033[0m"      # Reset text formatting and color
 BOLD = "\033[1m"       # Bold text
