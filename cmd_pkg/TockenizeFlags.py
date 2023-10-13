@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 def tockenizeFlags(flagList:list[str])-> set[str]:
     """
     Splits compounded flags into single letter flags, and

@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 from . import fileSystem
 from .TockenizeFlags import tockenizeFlags
 from .InvalidFlagsMsg import invalidFlagsMsg

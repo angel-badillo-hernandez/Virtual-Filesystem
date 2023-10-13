@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import os, stat, datetime, pwd, grp
 from .TockenizeFlags import tockenizeFlags
 from .InvalidFlagsMsg import invalidFlagsMsg

@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 from types import FunctionType
 
 def invalidFlagsMsg(func:FunctionType, validFlags:set[str], flags:set[str])-> str:
