@@ -1,9 +1,17 @@
-1,0,home,directory,0,root,root,drwxr-xr-x,2017-11-03 16:28:42,0
-2,1,angel,directory,0,angel,angel,drwxr-x---,2017-11-03 16:28:42,0
-3,2,Fortnite.exe,file,4096,angel,angel,-rwxr-xr-x,2017-11-03 16:28:42,Fortnite is kweel
-4,1,leslie,directory,0,leslie,leslie,drwxr-x---,2017-11-03 16:28:42,0
-5,2,Spiderman3.mp4,file,42,angel,angel,-rwxr-xr-x,2017-11-03 16:28:42,10/10 Movie
+1,0,home,directory,0,root,root,drwxr-xr-x,2023-11-03 01:28:30,0
+2,1,angel,directory,0,angel,angel,drwxr-x---,2017-12-03 22:28:42,0
+3,2,Fortnite.exe,file,4096,angel,angel,-rw-r-xr-x,2020-12-24 01:28:40,0
+4,1,leslie,directory,0,leslie,leslie,dr--------,2023-10-16 23:59:59,0
+5,2,stuff.pdf,file,42,angel,angel,-rwxr-xr-x,2002-11-03 16:28:42,0
 6,0,sys,directory,0,root,root,drwxr-xr-x,2017-11-03 16:28:42,0
-7,1,vscode.exe,file,1024,angel,angel,-rwxr-xr-x,2017-11-03 16:28:42,Angel invented coding (Real)
-8,0,trojan_virus.exe,file,1073741824,government,government,-rwxr-x---,2017-11-03 16:28:42,You are being watched
-9,1,Fortnite.exe,file,1010101010,angel,angel,-rwxr-x---,2017-11-03 16:28:42,Hii
+7,1,vscode.exe,file,1024,angel,angel,-rwxr-xr-x,2017-11-03 16:28:42,0
+8,0,edge.exe,file,1073741824,user,user,-rwxr-x---,2017-11-03 16:28:42,0
+9,1,Fortnite.exe,file,1010101,angel,angel,-rwxr-x---,2017-11-03 16:28:42,0
+10,6,main.c,file,1099511627776,angel,angel,-rwxrwxrw-,2024-11-03 16:28:42,0
+11,0,boot,directory,0,angel,angel,drwxrwxrwx,2023-10-03 05:23:00,0
+12,0,bin,directory,0,angel,angel,drwxrwx---,2023-10-03 05:23:00,0
+13,0,.gitignore,file,2048,admin,admin,-rw-rwxrwx,2024-11-03 06:08:00,0
+14,2,.vscode,directory,0,angel,angel,drwxrwxrwx,2023-10-03 05:23:00,0
+15,0,.thumbnail,directory,0,root,root,drwxr-x---,2017-12-03 22:28:42,0
+16,0,stuff.txt,file,4096,angel,angel,-rw-rwxrwx,2024-11-03 06:08:00,0
+17,0,init,file,1099511627776,root,root,-rwxrwxrwx,2099-11-03 06:08:00,0
