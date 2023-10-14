@@ -1,7 +1,7 @@
 import cmd_pkg
 from cmd_pkg import fileSystem
 from ParseCommand import parseCommand, ShellCommand
-
+import sys
 # DB Constants
 DB_PATH: str = "filesystem.sqlite"
 CSV_FILE: str = "fileData.csv"
@@ -38,7 +38,7 @@ if __name__ == "__main__":
         # Exit if Ctrl-C is entered
         except KeyboardInterrupt:
             print("\n")
-            raise SystemExit()
+            raise SystemExit
 
         # Singular, "simple" command is parsed
         temp = parseCommand(cmdStr)
