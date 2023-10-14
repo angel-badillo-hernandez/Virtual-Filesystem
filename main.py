@@ -1,7 +1,7 @@
 import cmd_pkg
 from cmd_pkg import fileSystem
 from ParseCommand import parseCommand, ShellCommand
-import sys
+
 # DB Constants
 DB_PATH: str = "filesystem.sqlite"
 CSV_FILE: str = "fileData.csv"

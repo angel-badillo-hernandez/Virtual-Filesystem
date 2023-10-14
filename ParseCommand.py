@@ -1,6 +1,6 @@
 import shlex
 
-class ShellCommand(object):
+class ShellCommand:
     """
     Class description
     """
