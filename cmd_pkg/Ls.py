@@ -26,7 +26,6 @@ def format_bytes(num_bytes: float) -> str:
 
     power_labels = {0: "", 1: "K", 2: "M", 3: "G", 4: "T"}
     while num_bytes >= power:
-        print(num_bytes, power)
         num_bytes /= power
         n += 1
 

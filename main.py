@@ -4,7 +4,7 @@ from ParseCommand import parseCommand, ShellCommand
 
 # DB Constants
 DB_PATH: str = "filesystem.sqlite"
-CSV_FILE: str = "fakeFileData.csv"
+CSV_FILE: str = "fileData.csv"
 TABLE_NAME: str = "FileSystem"
 
 # ANSI Escape Sequences for controlling text colors
