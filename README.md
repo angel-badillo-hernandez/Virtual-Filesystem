@@ -7,23 +7,46 @@
 #### [Leslie Cook](https://github.com/Leslie-N-Cook)
 
 ### Overview:
-Create a sqlite database to store the appropriate file system files, directories, and metadata for each. 
+Create a sqlite database as virtual file system with files, directories, and metadata for each. 
+Run linux shell commands within the sqlite database to navigate the virtual file system.
 
 ### Instructions
 
-- Ensure all modules are installed for the shell commands by running
+1. Install the required packages 
 
-  `pip3 install -r requirements.txt` or `pip install -r requirements.txt`
+   `pip install -r requirements.txt`
 
-- Execute the filesystem commands by running
+2. Execute the file system shell 
     
     `python3 main.py` or `python main.py`
 
-### File System
-<img src=photos/filesystem.png>
+3. Run the commands to navigate the file system
+  
+    `ls -lah` - list files and directories in current directory
+      
+    `mkdir bananas` - make directory
+  
+    `cd bananas` - change directory
 
-### Requirements 
-<img src=photos/image_req.png>
+    `cd ..` - move back one directory
+  
+    `pwd` - print working directory
+
+    `mv stuff.txt bananas` - move a file to another directory
+
+    `cp bananas/stuff.txt home/angel/newfile.txt` - copy file from a directoy and rename it in another location
+  
+    `rm -rf bananas` - remove file or directory
+
+    `chmod 777 home` - change permissions of file or directory using octal notation
+
+    `exit` - exit the shell's virtual file system 
+
+### Virtual File System in SQLite Database
+<img src=photos/filesystem.png>
 
 ### Walkthrough
 <img src=photos/image.png>
+
+### Assignment Requirements 
+<img src=photos/image_req.png>
