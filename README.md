@@ -8,16 +8,19 @@
 
 ### Overview:
 Create a sqlite database to store the appropriate file system files, directories, and metadata for each. 
+
 ### Instructions
 
-- First, ensure all modules are installed for the shell commands by running
+- Ensure all modules are installed for the shell commands by running
 
   `pip3 install -r requirements.txt` or `pip install -r requirements.txt`
 
-- Next, execute the shell by running
+- Execute the filesystem commands by running
     
-      `python3 <whatever>.py` or `python <whatever>.py`
+    `python3 main.py` or `python main.py`
 
-|        File            |                  Description                  |    Author     |        Example Usage          |        
-| :--------------------: | :-------------------------------------------: | :-----------: | :---------------------------: |
-|                        |                                               | Angel, Leslie |                               |
+### Requirements 
+<img src=photos/image_req.png>
+
+### Walkthrough
+<img src=photos/image.png>
