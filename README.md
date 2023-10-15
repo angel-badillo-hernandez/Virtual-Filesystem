@@ -1,13 +1,11 @@
 ## 5143 Virtual Filesystem - P02
-
-
 ### Group Members
 
 #### [Angel Badillo](https://github.com/It-Is-Legend27)
 #### [Leslie Cook](https://github.com/Leslie-N-Cook)
 
 ### Overview:
-Create a sqlite database as virtual file system with files, directories, and metadata for each. 
+Create a sqlite database that acts as a virtual file system with files, directories, and metadata for each. 
 Run linux shell commands within the sqlite database to navigate the virtual file system.
 
 ### Instructions
