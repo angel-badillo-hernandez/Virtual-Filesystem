@@ -571,7 +571,7 @@ def chmod(path: str, mode: int) -> None:
 
 def copy_file(src: str, dest: str) -> None:
     """
-    Stuff
+    Copies a file from src to dest.
     """
     src = abs_path(src)
     dest = abs_path(dest)
@@ -627,7 +627,7 @@ def copy_file(src: str, dest: str) -> None:
 
 def move(src: str, dest: str) -> None:
     """
-    Stuff
+    Moves a file from src to dest.
     """
     src = abs_path(src)
     dest = abs_path(dest)
@@ -878,21 +878,31 @@ def remove_tree(path: str) -> None:
 
 
 def is_abs_path(path: str) -> bool:
+    """
+    Returns true if path is an absolute path.
+    """
     return True if path.startswith("/") else False
 
 
 def is_relative_path(path: str) -> bool:
+    """
+    Returns true if path is not an absolute path.
+    """
     return not is_abs_path(path)
 
 
 def abs_path(path: str) -> bool:
     """
-    Converts relative path to absolute path
+    Converts relative path to absolute path.
     """
     return norm_path(os.path.join(_cwd, path))
 
 
 def touch(path: str) -> bool:
+    """
+    Updates the modification time of a file if it exists.
+    If it does not exist, then creates a new file.
+    """
     path = abs_path(path)
 
     conn: sqlite3.Connection = sqlite3.connect(_db_path)
