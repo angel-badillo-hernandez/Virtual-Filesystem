@@ -19,6 +19,9 @@ Create a sqlite database to store the appropriate file system files, directories
     
     `python3 main.py` or `python main.py`
 
+### File System
+<img src=photos/filesystem.png>
+
 ### Requirements 
 <img src=photos/image_req.png>
 
